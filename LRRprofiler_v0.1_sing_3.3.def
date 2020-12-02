@@ -1,0 +1,85 @@
+
+#Bootstrap: docker
+#From: biopython/biopython
+#https://hub.docker.com/r/biopython/biopython/dockerfile
+
+BootStrap: library
+From: ubuntu:16.04
+
+
+%help
+	
+
+This container launches the LRRprofiler pipeline used to annot proteins with Leucine Rich Repeat motifs.
+=======================================================================================
+
+    usage (basic): LRRprofiler_v0.1.sif --in_proteome_file proteome.fasta --out_prefix rice
+    usage (help) : LRRprofiler_v0.1.sif
+
+    usage (example): LRRprofiler_v0.1.sif --in_proteome_file Oryza_Sativa_japonica_IRGSP_v1_0.fasta --out_prefix ORYSJ 
+
+For more details please see the pipeline documentation pages on the LRRprofiler website:
+==================================================================================
+https://bioweb.supagro.inra.fr/LRRprofiler
+
+
+If you use this pipeline please cite:
+=====================================
+
+    --------------------------------------
+
+MAFFT v7.271 
+    MAFFT: Katoh K., Standley D.M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780. Edgar R.C. (2004). 
+SMART database
+    ....
+    --------------------------------------
+
+
+%post
+    apt-get -y update 
+    #apt-get -y install git
+    apt-get -y install bioperl
+    apt-get -y install python3-numpy
+    apt-get -y install python-biopython
+    apt-get -y install unzip
+    apt-get -y install wget
+    #apt-get -y install openjdk-8-jre
+    apt-get -y install hmmer=3.1b2-2
+    apt-get -y install mafft=7.271-1
+    
+    apt list mafft hmmer
+    
+    rm -rf /var/lib/apt/lists/*
+    
+    wget https://github.com/kentnf/iTAK/archive/v1.7a.zip
+    unzip v1.7a.zip #create folder iTAK-1.7a
+    
+    
+
+    #chmod 755 /OMM_MACSE_V10.01/*.sh
+    #chmod 755 /OMM_MACSE_V10.01/*/*.sh
+    
+
+
+%environment
+    export LC_ALL=C
+    export LG_HOME_PATH="/OMM_MACSE_V10.01/"
+    export LG_MAFFT="mafft"
+    export LG_ITAK="/iTAK-1.7a/iTAK.pl"
+    
+
+    
+
+%runscript
+    #exec bash "$@"
+    exec perl /iTAK-1.7a/iTAK.pl "$@"
+
+%files
+    #OMM_MACSE_V10.01.zip
+
+%labels
+    Author Celine Gottin & Vincent Ranwez
+
+#sudo singularity  build LRRprofiler_v0.1.sif LRRprofiler_v0.1_sing_3.3.def
+#singularity run LRRprofiler_v0.1.sif
+#singularity run -help LRRprofiler_v0.1.sif

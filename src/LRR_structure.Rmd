@@ -1,0 +1,52 @@
+---
+title: "LRR_structure"
+output: html_document
+
+params:
+  wd: X
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r 1, fig.width=8, fig.height=2}
+library(ggplot2)
+library(reshape2)
+
+setwd(params$wd)
+
+LRR_domains <- read.csv("LRR_domains_filtered.csv", header=FALSE, sep=";")
+colnames(LRR_domains) <- c("Protein","Domain","Start","End")
+size <- read.csv("LRR_prot_size.csv", header=FALSE, sep=";")
+colnames(size) <- c("Protein","Length")
+Classe <- read.csv("LRR_classification.csv",header=FALSE,sep=";")
+colnames(Classe)<-c("Protein","Classe","LRR")
+
+##Combiner avec size
+LRR_domains <- merge(LRR_domains,size, all.x = TRUE, by = "Protein")
+
+LRR=LRR_domains[order(LRR_domains$Protein,LRR_domains$Start),]
+
+listeProt=unique(LRR$Protein)
+
+
+
+myColors=c("aquamarine2","lightgoldenrod","lightgoldenrod3","mediumpurple2","aquamarine4","chartreuse3","chartreuse1","darkolivegreen1","darkolivegreen4","darkseagreen2","forestgreen","hotpink3","indianred2","lightcyan3","lightskyblue","grey","grey3","yellow")
+
+names(myColors) <- c("BLAST","FBD","Fbox","Kinase","LRR_BAC","LRR_CC","LRR_FBOX","LRR_NLR","LRR_PS","LRR_RI","LRR_TYP","Malectin","Malectin_like","NBARC","TIR","TM","PS","Cys-Pair")
+
+for(prot in listeProt){
+  tmp=LRR[LRR$Protein==prot,]
+  if(nrow(tmp)>0){
+    g<-ggplot(tmp,aes(Length))+
+             geom_rect(aes(xmin=0,xmax=Length,ymin=-0.2,ymax=0.2))+ 
+             geom_rect(aes(xmin=Start,xmax=End,ymin=-1,ymax=1,fill=Domain))+
+	     scale_fill_manual(values = myColors)+
+             facet_grid(Protein~.)+ggtitle(paste(prot,Classe[Classe$Protein==prot,2]))
+    print(g)
+}}
+
+```
+

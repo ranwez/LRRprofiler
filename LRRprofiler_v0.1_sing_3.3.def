@@ -46,24 +46,33 @@ SMART database
     #apt-get -y install openjdk-8-jre
     apt-get -y install hmmer=3.1b2-2
     apt-get -y install mafft=7.271-1
+	
+	
+	## neened to install subversion
+    apt-get -y install software-properties-common
+    add-apt-repository universe
+    apt-get -y update
+    apt-get -y install subversion
+    ## end of subversion dependencies
     
-    apt list mafft hmmer
+    #apt list mafft hmmer
     
     rm -rf /var/lib/apt/lists/*
     
     wget https://github.com/kentnf/iTAK/archive/v1.7a.zip
     unzip v1.7a.zip #create folder iTAK-1.7a
     
-    
+    ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
+	svn checkout https://github.com/cgottin/LRRprofiler/src/
+	svn checkout https://github.com/cgottin/LRRprofiler/HMM_lib/
 
-    #chmod 755 /OMM_MACSE_V10.01/*.sh
-    #chmod 755 /OMM_MACSE_V10.01/*/*.sh
+	chmod 777 /src/*
     
 
 
 %environment
     export LC_ALL=C
-    export LG_HOME_PATH="/OMM_MACSE_V10.01/"
+    export LG_HOME_PATH="/src/"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK-1.7a/iTAK.pl"
     
@@ -72,7 +81,7 @@ SMART database
 
 %runscript
     #exec bash "$@"
-    exec perl /iTAK-1.7a/iTAK.pl "$@"
+    exec /src/LRRprofiler_global.sh --in_proteome $1 --name $2
 
 %files
     #OMM_MACSE_V10.01.zip

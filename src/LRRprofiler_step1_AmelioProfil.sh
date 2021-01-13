@@ -20,9 +20,6 @@
 #             Environment, variables, files
 #========================================================
 
-# Modules
-module load bioinfo/hmmer/3.1b2
-module load bioinfo/mafft/7.313
 
 # on error exit flag : set -e
 set -o errexit

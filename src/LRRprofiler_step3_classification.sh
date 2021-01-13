@@ -30,7 +30,7 @@ if (( $# == 0)); then
 fi
 
 MAIN=$(pwd)
-SCRIPT=$MAIN/SCRIPT
+SCRIPT=${LG_SCRIPT}
 
 PROTEOME=""
 NAME=""

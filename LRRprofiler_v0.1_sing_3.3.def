@@ -63,10 +63,9 @@ HMMER
     
     rm -rf /var/lib/apt/lists/*
     
-    wget https://github.com/kentnf/iTAK/archive/v1.7a.zip
-    unzip v1.7a.zip #create folder iTAK-1.7a
-    
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
+	svn checkout https://github.com/kentnf/iTAK/tags/v1.7a
+    mv v1.7a iTAK-1.7a
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/src/
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/HMM_lib/
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/example
@@ -77,8 +76,8 @@ HMMER
 
 
 %environment
-    #export LC_ALL=C
-    export LG_HOME_PATH="/src/"
+    export LG_SCRIPT="/src/"
+	export LG_HMMlib="/HMM_lib/"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK-1.7a/iTAK.pl"
     

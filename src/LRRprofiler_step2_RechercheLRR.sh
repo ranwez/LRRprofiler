@@ -32,7 +32,7 @@ if (( $# == 0)); then
 fi
 
 MAIN=$(pwd)
-SCRIPT=$MAIN/SCRIPT
+SCRIPT=${LG_SCRIPT}
 
 PROTEOME=""
 NAME="LRRprofiler"
@@ -100,8 +100,8 @@ mkdir $WD; cd $WD
 
 cat $MAIN/Res_$NAME/Res_step1/Liste* > ${NAME}_PriorClassif.txt
 
-ln -s $MAIN/HMM_lib/SMART_LRR_*.hmm .
-ln -s $MAIN/HMM_lib/LRR_NLR_ORYSJ_canonic.hmm .
+ln -s ${LG_HMMlib}/SMART_LRR_*.hmm .
+ln -s ${LG_HMMlib}/LRR_NLR_ORYSJ_canonic.hmm .
 ln -s ${LRR_RLK} .
 ln -s ${LRR_NLR} .
 

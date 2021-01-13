@@ -82,7 +82,7 @@ done
 
 # Variables
 MAIN=$(pwd)
-SCRIPT=/src
+SCRIPT=${LG_SCRIPT}
 
 TMP=tmp_$(date +'%Y%m%d_%H%M%S')
 RESDIR=$MAIN/Res_$NAME

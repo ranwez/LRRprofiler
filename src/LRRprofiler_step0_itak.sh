@@ -18,12 +18,9 @@
 #                Environment, variables, files
 #========================================================
 
-# Modules
-module load bioinfo/iTAK/1.7 
 
 # Variables
 MAIN=$(pwd)
-#PROTEOME=$1
 NAME=$2
 RESDIR=$3
 FNAME=$4
@@ -45,7 +42,8 @@ PROTEOME=$(basename $1)
 #========================================================
 
 # running iTAK (-m p mean running itak only for kinase search, not TF)
-perl /usr/local/bioinfo/iTAK/1.7/iTAK.pl -m p $PROTEOME
+#perl /usr/local/bioinfo/iTAK/1.7/iTAK.pl -m p $PROTEOME
+perl $LG_ITAK -m p $PROTEOME
 
 # Saving results
 if [[ ! -e $RESDIR ]];then
@@ -55,7 +53,7 @@ fi
 cp ${PROTEOME}_output/shiu_alignment.txt $RESDIR/$FNAME
 
 # Cleaning
-#cd $MAIN ; rm -r $WD
+cd $MAIN ; rm -r $WD
 
 echo "END STEP 0"
 

@@ -67,11 +67,10 @@ HMMER
     unzip v1.7a.zip #create folder iTAK-1.7a
     
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
-	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/src/
-	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/HMM_lib/
-	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/example
-	wget https://github.com/cgottin/LRRprofiler/LRRprofiler.tar
-	tar -x LRRprofiler.tar
+	svn checkout https://github.com/cgottin/LRRprofiler/trunk/src/
+	svn checkout https://github.com/cgottin/LRRprofiler/trunk/HMM_lib/
+	svn checkout https://github.com/cgottin/LRRprofiler/trunk/example
+
 
 	chmod 777 /src/*
     

@@ -82,10 +82,10 @@ done
 
 # Variables
 MAIN=$(pwd)
-SCRIPT=$MAIN/SCRIPT
+SCRIPT=/src
 
 TMP=tmp_$(date +'%Y%m%d_%H%M%S')
-RESDIR=$MAIN/Res_$NAME/
+RESDIR=$MAIN/Res_$NAME
 
 mkdir $TMP 
 

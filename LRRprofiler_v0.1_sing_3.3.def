@@ -13,10 +13,10 @@ From: ubuntu:16.04
 This container launches the LRRprofiler pipeline used to annot proteins with Leucine Rich Repeat motifs.
 =======================================================================================
 
-    usage (basic): LRRprofiler_v0.1.sif --in_proteome_file proteome.fasta --out_prefix rice
+    usage (basic): LRRprofiler_v0.1.sif --in_proteome proteome.fasta --name rice
     usage (help) : LRRprofiler_v0.1.sif
 
-    usage (example): LRRprofiler_v0.1.sif --in_proteome_file Oryza_Sativa_japonica_IRGSP_v1_0.fasta --out_prefix ORYSJ 
+    usage (example): LRRprofiler_v0.1.sif --in_proteome Oryza_Sativa_japonica_IRGSP_v1_0.fasta --name ORYSJ 
 
 For more details please see the pipeline documentation pages on the LRRprofiler website:
 ==================================================================================
@@ -29,8 +29,12 @@ If you use this pipeline please cite:
     --------------------------------------
 
 MAFFT v7.271 
-    MAFFT: Katoh K., Standley D.M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780. Edgar R.C. (2004). 
+    Katoh K., Standley D.M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780. Edgar R.C. (2004). 
+
 SMART database
+    ....
+
+HMMER
     ....
     --------------------------------------
 
@@ -63,15 +67,18 @@ SMART database
     unzip v1.7a.zip #create folder iTAK-1.7a
     
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
-	svn checkout https://github.com/cgottin/LRRprofiler/src/
-	svn checkout https://github.com/cgottin/LRRprofiler/HMM_lib/
+	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/src/
+	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/HMM_lib/
+	#svn checkout https://github.com/cgottin/LRRprofiler/tree/master/example
+	wget https://github.com/cgottin/LRRprofiler/LRRprofiler.tar
+	tar -x LRRprofiler.tar
 
 	chmod 777 /src/*
     
 
 
 %environment
-    export LC_ALL=C
+    #export LC_ALL=C
     export LG_HOME_PATH="/src/"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK-1.7a/iTAK.pl"
@@ -80,8 +87,7 @@ SMART database
     
 
 %runscript
-    #exec bash "$@"
-    exec /src/LRRprofiler_global.sh --in_proteome $1 --name $2
+    exec bash /src/LRRprofiler_global.sh "$@"
 
 %files
     #OMM_MACSE_V10.01.zip

@@ -130,9 +130,9 @@ if [[ ! -e $RESDIR/Res_step1/LRR_kinase_$NAME.hmm ]]; then
     gawk '{print($1,$3,$4)}' $RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"Kinase",start,end)}' > $MAIN/$TMP/ListeKinase.txt
     
     if [[ $devopt==true ]];then
-        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile $MAIN/HMM_lib/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm --dev
+        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm --dev
     else
-        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile $MAIN/HMM_lib/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm
+        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMM_lib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm
     fi
 
 else
@@ -145,14 +145,14 @@ if [[ ! -e $RESDIR/Res_step1/LRR_NLR_$NAME.hmm ]]; then
 
     echo -e "Running step 1 for LRR-NLR motifs"
     
-    hmmsearch -o $TMP/del.tmp -Z 35000 --nobias --noali --domtblout $MAIN/$TMP/NBARC.tbl $MAIN/HMM_lib/NB-ARC.hmm $PROTEOME
+    hmmsearch -o $TMP/del.tmp -Z 35000 --nobias --noali --domtblout $MAIN/$TMP/NBARC.tbl ${LG_HMMlib}/NB-ARC.hmm $PROTEOME
 
     gawk '$1!~/#/{print($1,$18,$19)}' $MAIN/$TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NBARC",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"NBARC",start,end)}' > $MAIN/$TMP/ListeNBARC.txt
 
     if [[ $devopt==true ]];then
-        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile $MAIN/HMM_lib/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm --dev
+        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm --dev
     else
-        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile $MAIN/HMM_lib/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm
+        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm
     fi
 
 else

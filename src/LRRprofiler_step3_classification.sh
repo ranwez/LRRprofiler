@@ -92,7 +92,7 @@ gawk 'BEGIN{OFS=";"}{if($1~/>/){if(length(prot)>0){print(prot,L)};gsub(">","");p
 ## b. recherche domaines fonctionnels
 for hmm in F-box FBD Malectin Malectin_like TIR Cys-typeA Cys-typeB Cys-typeC Cys-typeD Cys-typeE
 do
-    hmmsearch -o del.tmp --nobias --noali --domtblout ${hmm}_$NAME.tbl $MAIN/HMM_lib/${hmm}.hmm LRR_${NAME}.fasta
+    hmmsearch -o del.tmp --nobias --noali --domtblout ${hmm}_$NAME.tbl ${LG_HMMlib}/${hmm}.hmm LRR_${NAME}.fasta
 done
 
 ## c. Extraire domaines

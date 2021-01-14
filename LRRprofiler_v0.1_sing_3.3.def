@@ -4,7 +4,7 @@
 #https://hub.docker.com/r/biopython/biopython/dockerfile
 
 BootStrap: library
-From: ubuntu:16.04
+From: ubuntu:18.04
 
 
 %help
@@ -36,36 +36,52 @@ SMART database
 HMMER
     ....
     --------------------------------------
-
+#https://packages.ubuntu.com/search?suite=default&section=all&arch=any&keywords=biopython&searchon=names
 
 %post
-    apt-get -y update 
-	apt-get -y install software-properties-common
-	add-apt-repository -y ppa:deadsnakes/ppa
 	apt-get -y update
-    apt-get -y install python3.6
-	apt-get -y install python3-pip
-	pip3 install --upgrade pip
-	#python -m pip install biopython
-	apt-get -y install python-biopython
-	apt-get -y install bioperl
+	apt-get -y install software-properties-common
+	add-apt-repository universe
+    apt-get -y update 
+	
+    #apt-get -y install python3.6
+	#apt-get -y install python3-pip
+	#pip3 install --upgrade pip
+	#python3.6 -m pip install biopython
+	apt-get -y install python3-biopython
+	
     apt-get -y install unzip
     apt-get -y install wget
-    apt-get -y install hmmer=3.1b2-2
-    apt-get -y install mafft=7.271-1
-	apt -y install r-base
+    apt-get -y install hmmer
+    apt-get -y install mafft
+	apt-get -y install r-base
+	apt-get -y install r-base-dev
 	apt-get install -y gawk
 	
 	
 	## neened to install subversion
-    add-apt-repository universe
+    
     apt-get -y update
     apt-get -y install subversion
     ## end of subversion dependencies
     
+	##BioPerl could not be found using apt-get, the sources.list needs to be update
+#echo "
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic main restricted
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-updates main restricted
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic universe
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-updates universe
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic multiverse
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-updates multiverse
+#deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-backports main restricted universe multiverse
+#deb http://security.ubuntu.com/ubuntu bionic-security main restricted
+#deb http://security.ubuntu.com/ubuntu bionic-security universe
+#deb http://security.ubuntu.com/ubuntu bionic-security multiverse" >> /etc/apt/sources.list
+
+	#apt-get -y update
+	apt-get -y install bioperl
+	
     #apt list mafft hmmer
-    
-    rm -rf /var/lib/apt/lists/*
     
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
 	svn checkout https://github.com/kentnf/iTAK/trunk/
@@ -74,13 +90,15 @@ HMMER
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/HMM_lib/
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/example
 
-
 	chmod 777 /src/*
 	chmod -R 777 /iTAK/
 	# run iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
     
-
+	
+	rm -rf /var/lib/apt/lists/*
+	apt-get purge -y --auto-remove subversion wget unzip
+	apt-get clean
 
 %environment
 	export LC_ALL=C
@@ -88,6 +106,11 @@ HMMER
 	export LG_HMMlib="/HMM_lib"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK/iTAK.pl"
+	R_VERSION=3.6.1
+	export R_VERSION
+	R_CONFIG_DIR=/etc/R/
+	export R_CONFIG_DIR
+	export PATH=$PATH
     
 
     

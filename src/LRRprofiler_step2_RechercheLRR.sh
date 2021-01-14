@@ -121,7 +121,7 @@ do
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
 	    rm ${outfile} #empty file
     else
-	    python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}.csv
+	    python3.6 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}.csv
     fi
     
 done
@@ -143,13 +143,13 @@ do
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
 	    rm ${outfile} #enpty file
     else
-	    python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $(pwd)/${outfile%.tbl}.csv
+	    python3.6 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $(pwd)/${outfile%.tbl}.csv
     fi
     
 done
 
 ## e. Concatener tous les motifs trouves
-python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS_init.csv 
+python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS_init.csv 
 
 
 
@@ -217,7 +217,7 @@ gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
 }' Resblast.tmp > Resblast.txt
 
 #processed
-python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+python3.6 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
 
 ##suppr csv pour eviter redondance avec etapes d'apres
 rm *${NAME}.csv
@@ -225,7 +225,7 @@ rm *search.csv
 rm SMART_LRR_CC.csv
 
 #concat
-python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS.csv
+python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS.csv
 
 #SAVE results
 cp LRR_${NAME}_ALLMOTIFS.csv $OUT_DIR/.

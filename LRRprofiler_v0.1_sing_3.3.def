@@ -40,13 +40,17 @@ HMMER
 
 %post
     apt-get -y update 
-    apt-get -y install bioperl
-	apt-get install python3.6
-    apt-get -y install python3-numpy
-    apt-get -y install python-biopython
+	apt-get -y install software-properties-common
+	add-apt-repository -y ppa:deadsnakes/ppa
+	apt-get -y update
+    apt-get -y install python3.6
+	apt-get -y install python3-pip
+	pip3 install --upgrade pip
+	#python -m pip install biopython
+	apt-get -y install python-biopython
+	apt-get -y install bioperl
     apt-get -y install unzip
     apt-get -y install wget
-    #apt-get -y install openjdk-8-jre
     apt-get -y install hmmer=3.1b2-2
     apt-get -y install mafft=7.271-1
 	apt -y install r-base
@@ -54,7 +58,6 @@ HMMER
 	
 	
 	## neened to install subversion
-    apt-get -y install software-properties-common
     add-apt-repository universe
     apt-get -y update
     apt-get -y install subversion
@@ -81,8 +84,8 @@ HMMER
 
 %environment
 	export LC_ALL=C
-    export LG_SCRIPT="/src/"
-	export LG_HMMlib="/HMM_lib/"
+    export LG_SCRIPT="/src"
+	export LG_HMMlib="/HMM_lib"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK/iTAK.pl"
     

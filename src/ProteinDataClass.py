@@ -42,7 +42,7 @@ class Sequence :
 class Protein(Sequence) :
     
     def __init__(self,Identifier,Size=0,Organism="Unknown",Chromosome="Unknown") :
-        super(Sequence, self).__init__(Identifier,Size)
+        super().__init__(Identifier,Size)
         self.organism=Organism
         self.chromosome=Chromosome
         self.motifs=[]

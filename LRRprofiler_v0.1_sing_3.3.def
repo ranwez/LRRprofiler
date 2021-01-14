@@ -41,6 +41,7 @@ HMMER
 %post
     apt-get -y update 
     apt-get -y install bioperl
+	apt-get install python3.6
     apt-get -y install python3-numpy
     apt-get -y install python-biopython
     apt-get -y install unzip

@@ -188,7 +188,6 @@ echo "  STEP 3 : Sequence annotation & classification"
 echo -e "-----------------------------------------------\n"
 
 if [[ $devopt==1 ]];then
-	"running dev mode"
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3 --dev
 else
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3

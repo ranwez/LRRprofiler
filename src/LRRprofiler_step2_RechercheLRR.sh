@@ -61,7 +61,7 @@ while (( $# > 0 )); do
 		    quit_pb_option
 	    fi
 	    ;;
-  --nlr_profile)
+	--nlr_profile)
       LRR_NLR=$(readlink -f "$2"); shift 2;
       if [ ! -f  $LRR_NLR ]; then
         echo "File $LRR_NLR does not exist"
@@ -74,7 +74,7 @@ while (( $# > 0 )); do
         mkdir "$OUT_DIR"
       fi
 	    ;;
-  --dev)
+	--dev)
       devopt=1; shift 1
       ;;
 	*)
@@ -233,7 +233,7 @@ cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 
 cd $MAIN 
 
-if [[ $devopt==0 ]];then
+if [[ $devopt -eq 0 ]];then
   rm -r $WD
 fi
 

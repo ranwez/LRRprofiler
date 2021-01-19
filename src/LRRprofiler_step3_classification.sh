@@ -188,9 +188,9 @@ cp LRR_structure_${NAME}.html $RESDIR/.
 
 cd $MAIN 
 
-#if [[ $devopt==0 ]];then
-#   rm -r $WD
-#fi
+if [[ $devopt -eq 0 ]];then
+   rm -r $WD
+fi
 
 echo "END STEP 3"
 

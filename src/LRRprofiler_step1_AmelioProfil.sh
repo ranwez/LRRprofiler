@@ -265,7 +265,7 @@ echo "moving list $ListProt to $OUT_DIR/ "
 
 cd $MAIN ;
 
-if [[ $devopt==0 ]];then
+if [[ $devopt -eq 0 ]];then
    rm -r $WD
 fi
 

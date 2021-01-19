@@ -9,12 +9,11 @@ From: ubuntu:18.04
 
 %help
 
-
 This container launches the LRRprofiler pipeline used to annot proteins with Leucine Rich Repeat motifs.
 =======================================================================================
 
-    usage (help) : LRRprofiler_v0.1.sif
-    usage (basic): LRRprofiler_v0.1.sif --in_proteome <fasta file> --name <string>
+    usage (help)   : LRRprofiler_v0.1.sif
+    usage (basic)  : LRRprofiler_v0.1.sif --in_proteome <fasta file> --name <string>
     usage (example): LRRprofiler_v0.1.sif --in_proteome Oryza_Sativa_japonica_IRGSP_v1_0.fasta --name ORYSJ 
 
 For more details please see the pipeline documentation pages on the LRRprofiler website:
@@ -35,6 +34,9 @@ SMART database
 
 HMMER v3.1b2
     ....
+	
+iTAK 
+	....
     --------------------------------------
 #https://packages.ubuntu.com/search?suite=default&section=all&arch=any&keywords=biopython&searchon=names
 
@@ -91,6 +93,8 @@ HMMER v3.1b2
 	
 	# running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
+	
+	R --slave -e 'install.packages("rmarkdown")
     
 	#Cleaning
 	#rm -rf /var/lib/apt/lists/*

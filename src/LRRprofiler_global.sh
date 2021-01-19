@@ -149,7 +149,7 @@ if [[ ! -e $RESDIR/Res_step1/LRR_NLR_$NAME.hmm ]]; then
 
     gawk '$1!~/#/{print($1,$18,$19)}' $MAIN/$TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NBARC",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"NBARC",start,end)}' > $MAIN/$TMP/ListeNBARC.txt
 
-    if [[ $devopt==true ]];then
+    if [[ $devopt==1 ]];then
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm --dev
     else
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeNBARC.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_NLR_$NAME.hmm
@@ -188,6 +188,7 @@ echo "  STEP 3 : Sequence annotation & classification"
 echo -e "-----------------------------------------------\n"
 
 if [[ $devopt==1 ]];then
+	"running dev mode"
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3 --dev
 else
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3
@@ -198,9 +199,9 @@ fi
 ## cleaning
 ##-------------------------------
 
-if [[ $devopt==0 ]];then
-    cd $MAIN ; rm -r $TMP
-fi
+#if [[ $devopt==0 ]];then
+#    cd $MAIN ; rm -r $TMP
+#fi
 
 #========================================================
 #                      END

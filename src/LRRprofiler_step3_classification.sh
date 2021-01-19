@@ -173,7 +173,7 @@ ln -s $SCRIPT/LRR_structure.Rmd .
 
 cat > render.R <<EOF
 library(rmarkdown)
-render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(wd="$(pwd)"))
+render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
 EOF
 
 chmod +x render.R ; R CMD BATCH render.R 

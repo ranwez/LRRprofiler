@@ -57,6 +57,8 @@ iTAK
     apt-get -y install mafft
 	apt-get -y install r-base
 	apt-get -y install r-base-dev
+	apt-get -y install pandoc-data
+	apt-get -y install pandoc
 
 	## neened to install subversion
     apt-get -y update
@@ -94,7 +96,7 @@ iTAK
 	# running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
 	
-	R --slave -e 'install.packages("rmarkdown")
+	R --slave -e 'install.packages("rmarkdown")'
     
 	#Cleaning
 	#rm -rf /var/lib/apt/lists/*

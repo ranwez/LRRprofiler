@@ -40,7 +40,7 @@ OUT_DIR=""
 LRR_RLK=""
 LRR_NLR=""
 
-devopt=false
+devopt=0
 
 while (( $# > 0 )); do
     case "$1" in
@@ -75,7 +75,7 @@ while (( $# > 0 )); do
       fi
 	    ;;
   --dev)
-      devopt=true; shift 1
+      devopt=1; shift 1
       ;;
 	*)
             echo "Option $1 is unknown please ckeck your command line"
@@ -233,7 +233,7 @@ cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 
 cd $MAIN 
 
-if [[ $devopt==false ]];then
+if [[ $devopt==0 ]];then
   rm -r $WD
 fi
 

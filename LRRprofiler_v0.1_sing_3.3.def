@@ -8,7 +8,7 @@ From: ubuntu:18.04
 
 
 %help
-	
+
 
 This container launches the LRRprofiler pipeline used to annot proteins with Leucine Rich Repeat motifs.
 =======================================================================================
@@ -33,39 +33,36 @@ MAFFT v7.271
 SMART database
     ....
 
-HMMER
+HMMER v3.1b2
     ....
     --------------------------------------
 #https://packages.ubuntu.com/search?suite=default&section=all&arch=any&keywords=biopython&searchon=names
+
+%files
+    tmhmm2.0c.tar
 
 %post
 	apt-get -y update
 	apt-get -y install software-properties-common
 	add-apt-repository universe
+
     apt-get -y update 
-	
-    #apt-get -y install python3.6
-	#apt-get -y install python3-pip
-	#pip3 install --upgrade pip
-	#python3.6 -m pip install biopython
 	apt-get -y install python3-biopython
-	
+	apt-get -y install gawk
     apt-get -y install unzip
     apt-get -y install wget
     apt-get -y install hmmer
     apt-get -y install mafft
 	apt-get -y install r-base
 	apt-get -y install r-base-dev
-	apt-get install -y gawk
-	
-	
+
 	## neened to install subversion
-    
     apt-get -y update
     apt-get -y install subversion
     ## end of subversion dependencies
     
 	##BioPerl could not be found using apt-get, the sources.list needs to be update
+	## corrected with "add-apt-repository universe"
 #echo "
 #deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic main restricted
 #deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-updates main restricted
@@ -78,10 +75,7 @@ HMMER
 #deb http://security.ubuntu.com/ubuntu bionic-security universe
 #deb http://security.ubuntu.com/ubuntu bionic-security multiverse" >> /etc/apt/sources.list
 
-	#apt-get -y update
 	apt-get -y install bioperl
-	
-    #apt list mafft hmmer
     
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
 	svn checkout https://github.com/kentnf/iTAK/trunk/
@@ -92,13 +86,16 @@ HMMER
 
 	chmod 777 /src/*
 	chmod -R 777 /iTAK/
-	# run iTAK on test set to set up files
+	
+	tar -xf /tmhmm2.0c.tar
+	
+	# running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
     
-	
-	rm -rf /var/lib/apt/lists/*
-	apt-get purge -y --auto-remove subversion wget unzip
-	apt-get clean
+	#Cleaning
+	#rm -rf /var/lib/apt/lists/*
+	#apt-get purge -y --auto-remove subversion wget unzip
+	#apt-get clean
 
 %environment
 	export LC_ALL=C
@@ -106,6 +103,7 @@ HMMER
 	export LG_HMMlib="/HMM_lib"
     export LG_MAFFT="mafft"
     export LG_ITAK="/iTAK/iTAK.pl"
+	export LG_TMHMM="/tmhmm2.0c/bin/tmhmm"
 	R_VERSION=3.6.1
 	export R_VERSION
 	R_CONFIG_DIR=/etc/R/
@@ -117,9 +115,6 @@ HMMER
 
 %runscript
     exec bash /src/LRRprofiler_global.sh "$@"
-
-%files
-    #OMM_MACSE_V10.01.zip
 
 %labels
     Author Celine Gottin & Vincent Ranwez

@@ -35,7 +35,7 @@ SCRIPT=${LG_SCRIPT}
 PROTEOME=""
 NAME=""
 RESDIR=""
-devopt=false
+devopt=0
 
 while (( $# > 0 )); do
     case "$1" in
@@ -54,7 +54,7 @@ while (( $# > 0 )); do
       ;;
   --dev)   
       ## development option; will conserve running folder with every temporary files
-      devopt=true; shift 1
+      devopt=1; shift 1
       ;;
 
 	*)
@@ -104,7 +104,7 @@ do
 done
 
 ## tmhmm + garder peptide signal
-cat LRR_${NAME}.fasta | /usr/local/bioinfo/tmhmm/2.0a/bin/tmhmm -noplot > TMHMM_out.txt
+cat LRR_${NAME}.fasta | ${LG_TMHMM} -noplot > TMHMM_out.txt
 
 
 gawk 'BEGIN{OFS=";"}{if($3~/TMhelix/){if($4>30){print($1,"TM",$4,$5)}else{print($1,"PS",$4,$5)}}}' TMHMM_out.txt >> LRR_domains.tmp
@@ -188,7 +188,7 @@ cp LRR_structure_${NAME}.html $RESDIR/.
 
 cd $MAIN 
 
-if [[ $devopt==false ]];then
+if [[ $devopt==0 ]];then
    rm -r $WD
 fi
 

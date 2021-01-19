@@ -48,7 +48,7 @@ OUT_DIR="RES_step1_AmelioProfile_$(date +'%Y%m%d_%H%M%S')"
 outname="new_profile.hmm"
 itMax=15
 
-devopt=false
+devopt=0
 
 while (( $# > 0 )); do
     case "$1" in
@@ -83,7 +83,7 @@ while (( $# > 0 )); do
 	    outname="$2"; shift 2
 	    ;;
   --dev)
-      devopt=true; shift 1
+      devopt=1; shift 1
       ;;
 	*)
       echo "Option $1 is unknown please ckeck your command line"
@@ -265,7 +265,7 @@ echo "moving list $ListProt to $OUT_DIR/ "
 
 cd $MAIN ;
 
-if [[ $devopt==false ]];then
+if [[ $devopt==0 ]];then
    rm -r $WD
 fi
 

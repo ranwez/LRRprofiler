@@ -46,7 +46,7 @@ echo "==========================================================================
 
 PROTEOME=""
 NAME=""
-devopt=false
+devopt=0
 
 
 
@@ -68,7 +68,7 @@ while (( $# > 0 )); do
 	    ;;
   --dev)   
       ## development option; will conserve running folder with every temporary files
-      devopt=true; shift 1
+      devopt=1; shift 1
       echo "    dev option set in"
       ;;
 
@@ -129,7 +129,7 @@ if [[ ! -e $RESDIR/Res_step1/LRR_kinase_$NAME.hmm ]]; then
 
     gawk '{print($1,$3,$4)}' $RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"Kinase",start,end)}' > $MAIN/$TMP/ListeKinase.txt
     
-    if [[ $devopt==true ]];then
+    if [[ $devopt==1 ]];then
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm --dev
     else
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMM_lib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm
@@ -170,7 +170,7 @@ echo -e "--------------------------------\n"
 
 if [[ ! -e $RESDIR/Res_step2 ]];then
 
-    if [[ $devopt==true ]];then
+    if [[ $devopt==1 ]];then
         $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $MAIN/Res_$NAME/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $MAIN/Res_$NAME/Res_step1/LRR_NLR_$NAME.hmm --out_dir $RESDIR/Res_step2 --dev
     else
         $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $MAIN/Res_$NAME/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $MAIN/Res_$NAME/Res_step1/LRR_NLR_$NAME.hmm --out_dir $RESDIR/Res_step2
@@ -187,7 +187,7 @@ echo -e "\n-----------------------------------------------"
 echo "  STEP 3 : Sequence annotation & classification"
 echo -e "-----------------------------------------------\n"
 
-if [[ $devopt==true ]];then
+if [[ $devopt==1 ]];then
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3 --dev
 else
     $SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $RESDIR/Res_step3
@@ -198,8 +198,8 @@ fi
 ## cleaning
 ##-------------------------------
 
-if [[ $devopt==false ]];then
-    cd $MAIN ; rm -r tmp_$(date +'%Y%m%d_%H%M%S')/
+if [[ $devopt==0 ]];then
+    cd $MAIN ; rm -r $TMP
 fi
 
 #========================================================

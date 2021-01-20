@@ -168,22 +168,22 @@ gawk -F"[; ]" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/ || $2~/BLAST/){P[$1]++}}el
 mv tmp LRR_classification.csv
 
 
-## f. structure
-ln -s $SCRIPT/LRR_structure.Rmd .
+## f. structure  //!\\ not working yet in the container
+#ln -s $SCRIPT/LRR_structure.Rmd .
 
-cat > render.R <<EOF
-library(rmarkdown)
-render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
-EOF
+#cat > render.R <<EOF
+#library(rmarkdown)
+#render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
+#EOF
 
-chmod +x render.R ; R CMD BATCH render.R 
+#chmod +x render.R ; R CMD BATCH render.R 
 
 # SAVE results
 mkdir -p $RESDIR
 
 cp LRR_classification.csv $RESDIR/.
 cp LRR_domains_filtered.csv $RESDIR/.
-cp LRR_structure_${NAME}.html $RESDIR/.
+#cp LRR_structure_${NAME}.html $RESDIR/.
 
 
 cd $MAIN 

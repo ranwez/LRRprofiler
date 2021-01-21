@@ -176,7 +176,7 @@ ln -s $SCRIPT/render.R
 #render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
 #EOF
 
-chmod +x render.R ; R CMD BATCH render.R 
+R CMD BATCH render.R "$(pwd)"
 
 # SAVE results
 mkdir -p $RESDIR

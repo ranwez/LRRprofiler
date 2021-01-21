@@ -60,12 +60,8 @@ iTAK
 	apt-get -y install pandoc-data
 	apt-get -y install pandoc
 
-	## neened to install subversion
-    apt-get -y update
-    apt-get -y install subversion
-    ## end of subversion dependencies
     
-	##BioPerl could not be found using apt-get, the sources.list needs to be update
+	##if BioPerl is not found using apt-get, the sources.list needs to be update
 	## corrected with "add-apt-repository universe"
 #echo "
 #deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic main restricted
@@ -80,7 +76,11 @@ iTAK
 #deb http://security.ubuntu.com/ubuntu bionic-security multiverse" >> /etc/apt/sources.list
 
 	apt-get -y install bioperl
-    
+ 
+	## neened to install subversion
+    apt-get -y update
+    apt-get -y install subversion
+ 
     ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
 	svn checkout https://github.com/kentnf/iTAK/trunk/
     mv trunk iTAK
@@ -99,9 +99,9 @@ iTAK
 	R --slave -e 'install.packages("rmarkdown")'
     
 	#Cleaning
-	#rm -rf /var/lib/apt/lists/*
+	rm -rf /var/lib/apt/lists/*
 	#apt-get purge -y --auto-remove subversion wget unzip
-	#apt-get clean
+	apt-get clean
 
 %environment
 	export LC_ALL=C
@@ -123,7 +123,7 @@ iTAK
     exec bash /src/LRRprofiler_global.sh "$@"
 
 %labels
-    Author Celine Gottin & Vincent Ranwez
+    Author Céline Gottin & Vincent Ranwez
 
 #sudo singularity  build LRRprofiler_v0.1.sif LRRprofiler_v0.1_sing_3.3.def
 #singularity run LRRprofiler_v0.1.sif

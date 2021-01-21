@@ -183,7 +183,7 @@ mkdir -p $RESDIR
 
 cp LRR_classification.csv $RESDIR/.
 cp LRR_domains_filtered.csv $RESDIR/.
-cp LRR_structure_${NAME}.html $RESDIR/.
+cp LRR_structure.html $RESDIR/.
 
 
 cd $MAIN 

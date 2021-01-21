@@ -96,7 +96,7 @@ iTAK
 	# running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
 	
-	R --slave -e 'install.packages("rmarkdown","ggplot2")'
+	R --slave -e 'install.packages(c("rmarkdown","ggplot2","reshape2"))'
     
 	#Cleaning
 	rm -rf /var/lib/apt/lists/*

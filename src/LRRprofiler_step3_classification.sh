@@ -169,14 +169,14 @@ mv tmp LRR_classification.csv
 
 
 ## f. structure  //!\\ not working yet in the container
-#ln -s $SCRIPT/LRR_structure.Rmd .
-
+ln -s $SCRIPT/LRR_structure.Rmd .
+ln -s $SCRIPT/render.R
 #cat > render.R <<EOF
 #library(rmarkdown)
 #render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
 #EOF
 
-#chmod +x render.R ; R CMD BATCH render.R 
+chmod +x render.R ; R CMD BATCH render.R 
 
 # SAVE results
 mkdir -p $RESDIR

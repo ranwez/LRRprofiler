@@ -3,9 +3,7 @@ title: "LRR_structure"
 output: html_document
 
 params:
-  domains: X
-  sizes: Y
-  class: Z
+  wd: X
 ---
 
 ```{r setup, include=FALSE}
@@ -17,13 +15,13 @@ knitr::opts_chunk$set(echo = FALSE)
 library(ggplot2)
 library(reshape2)
 
-#setwd(params$wd)
+setwd(params$wd)
 
-LRR_domains <- read.csv(params$domains, header=FALSE, sep=";")
+LRR_domains <- read.csv("LRR_domains_filtered.csv", header=FALSE, sep=";")
 colnames(LRR_domains) <- c("Protein","Domain","Start","End")
-size <- read.csv(params$sizes, header=FALSE, sep=";")
+size <- read.csv("LRR_prot_size.csv", header=FALSE, sep=";")
 colnames(size) <- c("Protein","Length")
-Classe <- read.csv(params$class,header=FALSE,sep=";")
+Classe <- read.csv("LRR_classification.csv",header=FALSE,sep=";")
 colnames(Classe)<-c("Protein","Classe","LRR")
 
 ##Combiner avec size

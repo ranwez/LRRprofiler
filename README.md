@@ -6,7 +6,7 @@ Please cite : ...
 
 The program was developt for Linux os.
 
-The program use several external tools and database:
+The program uses several external tools and database:
 - iTAK 
 - HMMER (v3.1b2)
 - MAFFT (v7.271)

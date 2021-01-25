@@ -16,8 +16,11 @@ The program uses several external tools and database:
 ## Using Singularity (.sif) container
 
 A singularity container for the LRRprofiler program can be download directly in your workspace with:
+```
 singularity pull LRRprofiler.sif library://cgottin/default/lrr_profiler:0.1
-or from the [Sylabs cloud](https://cloud.sylabs.io/library/_container/600ea381517f0358917abf0a) 
+```
+or from the [Sylabs cloud](https://cloud.sylabs.io/library/_container/600ea381517f0358917abf0a) .
+
 The file LRRprofiler_v0.1_sing_3.3.def provide the corresponding singularity recipe.
 
 ### Running LRRprofiler

@@ -4,7 +4,7 @@ LRRprofiler is an automated program to detect and annotate LRR (Leucine-Rich Rep
 
 Please cite : ...
 
-The program was developt for Linux os.
+The program was developed for Linux os.
 
 The program uses several external tools and database:
 - iTAK 

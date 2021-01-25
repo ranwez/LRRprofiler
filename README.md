@@ -25,9 +25,13 @@ The file LRRprofiler_v0.1_sing_3.3.def provide the corresponding singularity rec
 
 ### Running LRRprofiler
 The program can be run with the command line :
+```
 singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname>
+```
 
 The program will work if all sequence headers are parsed without description (i.e. ">OS01g10200" and not ">OS01g10200 expressed protein")
 
 Using the example file :
+```
 singularity run lrr_profiler0.1.sif --in_proteome Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta --name ARATH
+```

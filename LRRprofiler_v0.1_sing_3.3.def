@@ -14,55 +14,54 @@ This container launches the LRRprofiler pipeline used to annot proteins with Leu
 
     usage (help)   : LRRprofiler_v0.1.sif
     usage (basic)  : LRRprofiler_v0.1.sif --in_proteome <fasta file> --name <string>
-    usage (example): LRRprofiler_v0.1.sif --in_proteome Oryza_Sativa_japonica_IRGSP_v1_0.fasta --name ORYSJ 
+    usage (example): LRRprofiler_v0.1.sif --in_proteome example/Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta --name ARATH 
 
 For more details please see the pipeline documentation pages on the LRRprofiler website:
 ==================================================================================
-#https://bioweb.supagro.inra.fr/LRRprofiler
+#https://github.com/cgottin/LRRprofiler
 
 
 If you use this pipeline please cite:
 =====================================
 
-    --------------------------------------
-
+	--------------------------------------
 MAFFT v7.271 
-    Katoh K., Standley D.M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780. Edgar R.C. (2004). 
+	Katoh K., Standley D.M. (2013). MAFFT multiple sequence alignment software version 7: improvements in performance and usability. Molecular biology and evolution, 30(4), 772-780. Edgar R.C. (2004). 
 
 SMART database
-    ....
+	Letunic et al. (2017) Nucleic Acids Res doi: 10.1093/nar/gkx922
 
 HMMER v3.1b2
-    ....
-	
+	S. R. Eddy. (2011) Accelerated profile HMM searches. PLoS Comp. Biol., 7:e1002195
+
 iTAK 
-	....
-    --------------------------------------
+	Zheng Yet al. (2016) iTAK: a program for genome-wide prediction and classification of plant transcription factors, transcriptional regulators, and protein kinases. Molecular Plant 9:1667-1670.
+	--------------------------------------
+
 #https://packages.ubuntu.com/search?suite=default&section=all&arch=any&keywords=biopython&searchon=names
 
 %files
-    tmhmm2.0c.tar
+	tmhmm2.0c.tar
 
 %post
 	apt-get -y update
 	apt-get -y install software-properties-common
 	add-apt-repository universe
 
-    apt-get -y update 
+	apt-get -y update 
 	apt-get -y install python3-biopython
 	apt-get -y install gawk
-    apt-get -y install unzip
-    apt-get -y install wget
-    apt-get -y install hmmer
-    apt-get -y install mafft
+	apt-get -y install unzip
+	apt-get -y install wget
+	apt-get -y install hmmer
+	apt-get -y install mafft
 	apt-get -y install r-base
 	apt-get -y install r-base-dev
 	apt-get -y install pandoc-data
 	apt-get -y install pandoc
 
-    
-	##if BioPerl is not found using apt-get, the sources.list needs to be update
-	## corrected with "add-apt-repository universe"
+##if BioPerl is not found using apt-get, the sources.list needs to be update
+## corrected with "add-apt-repository universe"
 #echo "
 #deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic main restricted
 #deb http://nova.clouds.archive.ubuntu.com/ubuntu/ bionic-updates main restricted
@@ -76,39 +75,39 @@ iTAK
 #deb http://security.ubuntu.com/ubuntu bionic-security multiverse" >> /etc/apt/sources.list
 
 	apt-get -y install bioperl
- 
-	## neened to install subversion
-    apt-get -y update
-    apt-get -y install subversion
- 
-    ## pour récuperer les scripts sur github (penser à donner les droits au scripts)
+
+## neened to install subversion
+	apt-get -y update
+	apt-get -y install subversion
+
+## pour récuperer les scripts sur github (penser à donner les droits au scripts)
 	svn checkout https://github.com/kentnf/iTAK/trunk/
-    mv trunk iTAK
+	mv trunk iTAK
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/src/
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/HMM_lib/
 	svn checkout https://github.com/cgottin/LRRprofiler/trunk/example
 
 	chmod 777 /src/*
 	chmod -R 777 /iTAK/
-	
+
 	tar -xf /tmhmm2.0c.tar
-	
-	# running iTAK on test set to set up files
+
+# running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
-	
+
 	R --slave -e 'install.packages(c("rmarkdown","ggplot2","reshape2"))'
-    
-	#Cleaning
+
+#Cleaning
 	rm -rf /var/lib/apt/lists/*
 	#apt-get purge -y --auto-remove subversion wget unzip
 	apt-get clean
 
 %environment
 	export LC_ALL=C
-    export LG_SCRIPT="/src"
+	export LG_SCRIPT="/src"
 	export LG_HMMlib="/HMM_lib"
-    export LG_MAFFT="mafft"
-    export LG_ITAK="/iTAK/iTAK.pl"
+	export LG_MAFFT="mafft"
+	export LG_ITAK="/iTAK/iTAK.pl"
 	export LG_TMHMM="/tmhmm2.0c/bin/tmhmm"
 	R_VERSION=3.6.1
 	export R_VERSION

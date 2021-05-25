@@ -132,7 +132,7 @@ if [[ ! -e $RESDIR/Res_step1/LRR_kinase_$NAME.hmm ]]; then
     if [[ $devopt -eq 1 ]];then
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm --dev
     else
-        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMM_lib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm
+        $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $PROTEOME --list_proteins $MAIN/$TMP/ListeKinase.txt --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_dir $RESDIR/Res_step1 --out_profile_name LRR_kinase_$NAME.hmm
     fi
 
 else

@@ -24,7 +24,7 @@ colnames(size) <- c("Protein","Length")
 Classe <- read.csv("LRR_classification.csv",header=FALSE,sep=";")
 colnames(Classe)<-c("Protein","Classe","LRR")
 
-##Combiner avec size
+##Combine with size
 LRR_domains <- merge(LRR_domains,size, all.x = TRUE, by = "Protein")
 
 LRR=LRR_domains[order(LRR_domains$Protein,LRR_domains$Start),]

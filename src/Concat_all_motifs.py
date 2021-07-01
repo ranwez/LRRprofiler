@@ -6,7 +6,7 @@ Created on Mon Apr 29 17:11:37 2019
 """
 
 #==================================================
-# This program concatenate all LRR motifs 
+# This script concatenate all LRR motifs 
 #==================================================
 
 # Packages and Classes
@@ -50,7 +50,7 @@ myDir=args.directory[0]
 fileList=os.listdir(myDir)
            
 
-## Fichier LRR
+## File LRR
 for files in fileList :
     if(re.search(".csv",files)!=None):
         #csvFile="%s/%s"%(myDir,files)
@@ -64,9 +64,9 @@ for files in fileList :
                 line_count += 1
             else :
                 if (row[0] not in DATA.proteins) :
-                    ##Creation de la proteine dans le proteome
+                    ##Create protein in proteome
                     DATA.add_protein(row[0],0,DATA.id)
-                # Ajout des motifs
+                # Add LRR motifs
                 if (row[1]!="interLRR") :
                     DATA.proteins[row[0]].add_motif(row[1],int(row[3]),int(row[4]),float(row[6]))
         csv_file.close()
@@ -74,8 +74,8 @@ for files in fileList :
 
 ## 2 . Processing data
 ##---------------------
-# Pour chaque proteine, on ordonne les motifs en fonction de la position de depart
-# puis on supprime les elements ayant la meme position
+# For each protein, we sort motifs according to start position
+# then we delete element with same positions
 for prot in DATA.proteins :  
     DATA.proteins[prot].rm_duplicate()
     DATA.proteins[prot].order_motifs()

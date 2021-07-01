@@ -14,11 +14,11 @@ Created on Wed Mar 13 15:26:58 2019
 
 class hmmHit() :
     def __init__(self) :
-        ## Récupération des info sur un Hit (protéine) HMMsearch
-        self.id="" ## id protéine
-        self.seq="" ## sequence protéine
+        ## retrieving HSPs informations from HMMsearch results
+        self.id="" ## id proteine
+        self.seq=""
         self.profile="" ## profile name
-        self.profile_len="" ## taille motif
+        self.profile_len=""
         self.score=[]
         self.eval=[]
         self.startHsps=[]
@@ -28,13 +28,13 @@ class hmmHit() :
         self.interMotifLen=[]
         self.interMotifPos=[]
         self.typeMotif=[]
-        self.limitSup=[] ##pour blast : borne sup et inf du interLRR à ne pas dépasser
+        self.limitSup=[] ##for blast : sup and inf boundaries of interLRR
         self.limitInf=[]
      
         
     def complete_with_hmmsearch(self, hmmsearchHit, profilename, profLen, sequence) :
         for elm in hmmsearchHit.hsps :
-            #if(elm.evalue<1.0): ## filtre sur evalue du motif
+            #if(elm.evalue<1.0): ## if ths for hit filtering
             self.id=hmmsearchHit.id
             self.seq=sequence
             self.profile=profilename
@@ -66,15 +66,13 @@ class hmmHit() :
         
         
     def extend_nter(self) :
-        # Etendre les LRR incomplets au début du motif
-        self.startHsps[0]=self.startHsps[0]-(self.startQuery[0]-1)  # Pour le premier motif   
-        ##si out of range (debut motif avant début sequence) debut motif=1
+        # Extend LRR annotation at the begining if not complete
+        self.startHsps[0]=self.startHsps[0]-(self.startQuery[0]-1)  # for the first motif   
+        ##if out of range (motif start before sequence start) then motif start=1
         if (self.startHsps[0]<1) :
             self.startHsps[0]=1
-        # Pour les autres motifs
+        # For other motif
         for lrr in range(1,len(self.startHsps)) :
-            # Si debut du motif i après/chevauche moins de deux résidus du motif i-1
-            # Debut motif i = début profil
             if (self.startHsps[lrr]-(self.startQuery[lrr]-1)) > self.endHsps[lrr-1]-2 :
                 self.startHsps[lrr]=self.startHsps[lrr]-(self.startQuery[lrr]-1)
             else :
@@ -83,45 +81,38 @@ class hmmHit() :
                 
                 
     def extend_cter(self) :
-        # Etendre la fin du LRR jusqu'a fin du motifs (+2 aa si motif suivant juste derrière) 
-        #(ou jusqu'à motif suivant si chevauchement)
+        # Extend LRR annotation at the end if not complete (if it remains 3 aa between 2 motifs after extention, the 3 aa are add at the end of the first motif) 
         for lrr in range(len(self.endHsps)-1) :
-            ## pos fin du motif si profil complet
             endMot=self.endHsps[lrr]+(self.profile_len-self.endQuery[lrr])
             if endMot < (self.startHsps[lrr+1]-3) :
-                ## Si prochain motif au dela de la fin du profil +2
-                ## etendre motif jusqu'à fin du profil
                 self.endHsps[lrr]=self.endHsps[lrr]+(self.profile_len-self.endQuery[lrr])
             else:
-                ## Si prochain LRR avant fin du profil -> pos=prochain motif -1
                 self.endHsps[lrr]=self.startHsps[lrr+1]-1 
     
         self.endHsps[-1]=self.endHsps[-1]+(self.profile_len-self.endQuery[-1])
-        ## Si out of range (fin motif après fin séquence)
+        ## if out of range
         if (self.endHsps[-1]>len(self.seq)) :
             self.endHsps[-1]=len(self.seq)
             
             
             
     def inter_motif(self) :
-        # Récupération des régions entre deux motifs LRR
         for i in range(1,len(self.startHsps)) :
             self.interMotifLen.append(self.startHsps[i]-self.endHsps[i-1]-1)
             self.interMotifPos.append(self.endHsps[i-1]+1)
             
             
     def inter_motif2(self) :
-        ##stocker interMotif après recherche de LRR dans interMotif
-        ##si pas de lrr en pos zero --> intermotif de 0 jusqu'au premier LRR
+        ##keeping interMotif after LRR search in interMotifs
         i=0
-        ## Ajout interLRR au début
+        ## Add interLRR at the begining
         self.interMotifLen.append(self.startHsps[0]-1)
         self.interMotifPos.append(1)
         if (len(self.startHsps)>1) :
             for i in range(1,len(self.startHsps)) :
                 self.interMotifLen.append(self.startHsps[i]-self.endHsps[i-1]-1)
                 self.interMotifPos.append(self.endHsps[i-1]+1)       
-        ##Ajout interLRR à la fin
+        ##Add interLRR at the end
         self.interMotifLen.append(len(self.seq)-self.endHsps[i])
         self.interMotifPos.append(self.endHsps[i]+1)
         
@@ -131,17 +122,15 @@ class hmmHit() :
         ## exclude first and/or last lrr motif if it is far from next/previous
         ## motif and has low score
         ## outScore = distance(i,j)/mean(score(i),score(j))
-        ## liste moyenneScore*Dist entre deux LRR
+        ## list meanscore*Dist between two LRR
         M=[]
         if len(self.score)>2 :
             for i in range(len(self.score)-1):
                 meanscore=(self.score[i]+self.score[i+1])/2
                 M.append(self.interMotifLen[i]*meanscore)
-            #meanDist=sum((self.interMotif[i] for i in self.interMotif))/len(self.interMotif)
-            #while(exclude) :
+
             meanM=sum(M)/len(M)
-            #Pour premier elm
-            #si metric[i] > x fois la moyenne --> exclusion
+            #if metric[i] > x time the mean --> excluded
             if M[0]>=3*meanM:
                 ##exclude first
                 self.score.pop(0)
@@ -200,15 +189,13 @@ class hmmHit() :
     def save_hit_to_file(self,filename):
         file=open(filename,"a")
         c=0
-        ##Ecrire les LRR et InterLRR dans l'ordre des positions dans la prot avec 
-        ## indice d'apparition
-        for i in range(len(self.startHsps)-1) : ## -1 pour range interLRR (1 de moins que LRR)
+        for i in range(len(self.startHsps)-1) : ## -1 for range interLRR 
             c=c+1
             file.write("%s;%s;%i;%i;%i;%i;%f;%s\n" % (self.id,self.typeMotif[i],c,self.startHsps[i],self.endHsps[i],self.endHsps[i]-self.startHsps[i]+1,self.eval[i],self.seq[self.startHsps[i]-1:self.endHsps[i]]))
             if (self.interMotifLen[i]) > 0 :
                 c=c+1
                 file.write("%s;%s;%i;%i;%i;%i;%f;%s\n" % (self.id,"interLRR",c,self.interMotifPos[i],self.interMotifPos[i]+self.interMotifLen[i]-1,self.interMotifLen[i],0,self.seq[self.interMotifPos[i]-1:self.interMotifPos[i]+self.interMotifLen[i]-1]))                
-        # extraction dernier LRR
+		# last LRR
         file.write("%s;%s;%i;%i;%i;%i;%f;%s\n" % (self.id,self.typeMotif[-1],c+1,self.startHsps[-1],self.endHsps[-1],self.endHsps[-1]-self.startHsps[-1]+1,self.eval[-1],self.seq[self.startHsps[-1]-1:self.endHsps[-1]]))
         file.close()       
         
@@ -234,7 +221,6 @@ class hmmHit() :
         
         
     def processed_data(self) :
-        ##Execution de toutes les fonctions pour etendre les LRR et extraire les ilots
         self.inter_motif()
         self.exclude_outliers()
         #self.find_LRR_in_interLRR()
@@ -246,21 +232,20 @@ class hmmHit() :
         
         
     def processed_interLRR(self) :
-        ##execution des methodes pour etendre les LRR des interLRR
         self.extend_nter()
         self.extend_cter()
         #self.inter_motif2()
 
     def processed_blastRes(self) :
-        ##Peut-importe les chevauchements, ils seront traites par le script Concat.
+        ##overlapping will be handle by the result concatenation script.
         for i in range(len(self.startHsps)) :
-            ## extend n-ter sur la base du match 
+            ## extend n-ter 
             if(self.startHsps[i]-(self.startQuery[i]-1)<self.limitInf[i]) :
                 self.startHsps[i]=self.limitInf[i]
             else :
                 self.startHsps[i]=self.startHsps[i]-(self.startQuery[i]-1)
 
-            ## extend c-ter sur la base du match 
+            ## extend c-ter 
             if(self.endHsps[i]+(self.profile_len-self.endQuery[i])>self.limitSup[i]):
                 self.endHsps[i]=self.limitSup[i]
             else:

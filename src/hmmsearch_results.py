@@ -11,12 +11,6 @@ Created on Wed Feb 13 13:45:01 2019
 #hmmsearch results exctraction, compilation and treatment
 #=================================================
 
-           
-## fonctions
-    # compile 2 result files without redundancies
-#def concat_results(res1, res2) :
-#    "todo"   
-    #return res3
     
     # filtering results on protein e-value
 def hit_eval_filter(res, hit_ths) :

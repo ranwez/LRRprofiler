@@ -7,10 +7,10 @@
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o $1 : Proteome (fasta)
-#             o $2 : Liste proteines
-#             o $3 : Profil initial Path
-#             o $4 : Profil final Path
-#             o $5 : Profil final name
+#             o $2 : Protein list
+#             o $3 : initial Profile Path
+#             o $4 : Final Profile Path
+#             o $5 : Final Profile name
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
 #========================================================
@@ -172,7 +172,7 @@ do
 
 
 
-# b) Resultats des profils : Profil; nbProteine liste trouvees; idem seuil 0.5,0.1,0.01 ; nbMotifs; taille moyenne motifs
+# b) Profile Results : Profile; nbProteine from list found; threshold 0.5,0.1,0.01 ; nbMotifs; mean length of motifs
 
     gawk -v prof=$(basename ${profile}) 'BEGIN{OFS="\t"; nb=0; sizeLRR=0; nbProt=0; nbProt5=0; nbProt1=0; nbProt01=0;}
             $1!~/^#/{P[$1]++;
@@ -226,7 +226,6 @@ do
 # f) Align sequence using MAFFT and build new profile
     
     echo "Building new HMM ..."
-    #~/bin/famsa-1.2.5-linux-static -go 9 motifsIt${it}.fasta motifsIt${it}_align.fasta
     mafft --quiet motifsIt${it}.fasta > motifsIt${it}_align.fasta
 
     hmmbuild -o /dev/null --amino Profile_${it}.hmm motifsIt${it}_align.fasta 

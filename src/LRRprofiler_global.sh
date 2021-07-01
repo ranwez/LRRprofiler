@@ -160,7 +160,7 @@ else
 fi
 
 
-## STEP 2 : Recherche LRR
+## STEP 2 : LRR detection
 ##--------------------------------------------
 
 echo -e "\n--------------------------------"
@@ -180,7 +180,7 @@ else
     echo -e "Found results for step 2; skipping step 2\n"
 fi
 
-## STEP 3 : Annotation sequences
+## STEP 3 : Sequence annotation
 ##--------------------------------------------
 
 echo -e "\n-----------------------------------------------"

@@ -84,16 +84,13 @@ class Protein(Sequence) :
       
   
     def order_motifs(self) :
-        ##ordonner les motif en fonction des positions start
-        ##puis update des index et gestion des doublons/chevauchement
+        ##Sort motifs according to their start positions
+        ##then update indexes and handle duplicate/overlap
         
-        ##récupérer index où les elements ne sont plus rangé
-        #index=1
         pos=0
         if (len(self.motifs)>1) :
             for idx in range(1,len(self.motifs)) :
                 if (self.motifs[idx].start<self.motifs[idx-1].start) :
-                    #mal rangé
                     elm=self.motifs[idx]
                     self.motifs.pop(idx)
                     pos=0
@@ -106,11 +103,10 @@ class Protein(Sequence) :
  
        
     def rm_duplicate(self) :
-        #pour l'ensemble des motifs LRR de la prot, si deux motifs ont la meme
-        #position de depart --> suppression de l'un d'eux
-        #exclure motifs totalement inclus dans d'autres
+        #For every LRR motif of the protein, if two motifs have the same
+        #start position --> suppr one of them
+        #Suppr LRR motifs that are inside another
 
-        # Toute les positions start et end :
         allStart=[]
         allEnd=[]
         for i in range(len(self.motifs)):
@@ -119,39 +115,39 @@ class Protein(Sequence) :
 
         # Check redondance
         for i in range(len(self.motifs)-1,-1,-1):
-            if(allStart.count(allStart[i])>1) : ## Si plsr element avec meme pos start
-                #index premier elm dupliqué
+            if(allStart.count(allStart[i])>1) : ## if several elm with same start position
+                #index of first duplicated elm
                 id1=allStart.index(allStart[i])
-                #index deuxieme elm dupliqué
+                #index of second duplicated elm
                 id2=allStart.index(allStart[i],id1+1)
 
-                ##Si f-box vs autre -->priorité à autre
+                ##if f-box vs other -->priority to other
                 if(re.search("LRR_Fbox",self.motifs[id2].type)!=None):
-                    ##suppr deuxieme elm
+                    ##suppr second elm
                     self.rm_motif(id2)
                     allStart.pop(id2)
                     allEnd.pop(id2)
                 elif(re.search("LRR_Fbox",self.motifs[id1].type)!=None):
-                    # Suppr premier elm
+                    # Suppr first elm
                     self.rm_motif(id1)
                     allStart.pop(id1)
                     allEnd.pop(id1)
                 elif(self.motifs[id1].eval<=self.motifs[id2].eval):
-                    #Suppr deuxieme elm
+                    #Suppr second elm
                     self.rm_motif(id2)
                     allStart.pop(id2)
                     allEnd.pop(id2)
                 else :
-                    # Suppr premier elm
+                    # Suppr first elm
                     self.rm_motif(id1)
                     allStart.pop(id1)
                     allEnd.pop(id1)
  
-        # Check inclusion/chevauchement 
+        # Check overlapping 
         exclude=[]
         for i in range(len(allStart)-1,0,-1):
             for j in range(0,i):
-                #si j inclus dans i ou i inclus dans j
+                #if j inside i or i inside j
                 if((allStart[i]<allStart[j] and allEnd[i]>allEnd[j]) or (allStart[i]>allStart[j] and allEnd[i]<allEnd[j])):
                     # Check eval
                     if(self.motifs[i].eval <= self.motifs[j].eval):     
@@ -160,11 +156,11 @@ class Protein(Sequence) :
                     else:
                         if not i in exclude :
                             exclude.append(i)
-                # Si i inclus dans j
+                # if i inside j
                 #if(allStart[i]>allStart[j] and allEnd[i]<allEnd[j]):
                     #if not i in exclude:
                         #exclude.append(i)
-                # Si chevauchement
+                # if overlap
                 elif((allStart[i]>allStart[j] and allStart[i]<allEnd[j]) or (allStart[j]>allStart[i] and allStart[j]<allEnd[i])):
                     if(self.motifs[i].eval <= self.motifs[j].eval):
                         if not j in exclude:
@@ -172,30 +168,29 @@ class Protein(Sequence) :
                     else:
                         if not i in exclude:
                             exclude.append(i)
-        # Pour eviter "out of range", retrait des index par ordre decroissant
+        # To avoid "out of range", supr index in revrse order
         exclude.sort(reverse=True)           
         for ind in exclude :
             self.rm_motif(ind)
 
 
     def correct_pos(self) :
-        ## Corriger les positions des motifs si chevauchements
-        ## on coupe la fin du motif au niveau du début du motif suivant -1
+        ## Corretc motif position if overlapping
         for i in range(len(self.motifs)-1) :
             if(self.motifs[i].end>=self.motifs[i+1].start):
                self.motifs[i].set_end(self.motifs[i+1].start-1) 
-    
-        
+
+
     def rm_motif(self,index) :
-        ## supprimer un motifs en position "index"
         self.motifs.pop(index)
-  
+
+
     def exclude_blast_outlier(self) :
-        ##Premier motif : si BLAST et à plus de 10 AA du motifs suivant -> rm
+        ##First motif : if BLAST and over 10 AA from next motif -> remove 
         if(self.motifs[0].type=="BLAST" and self.motifs[0].end+10<self.motifs[1].start) :
             self.rm_motif(0)
         
-         ##Dernier motif : idem
+         ##Last motif
         if(self.motifs[-1].type=="BLAST" and self.motifs[-1].start-10>self.motifs[-2].end) :
             self.rm_motif(-1)
   
@@ -219,7 +214,7 @@ class Protein(Sequence) :
 
     def extract_inter_regions(self) :
         for i in range(len(self.motifs)-1) :
-            # InterLRR de 3 aa minimum
+            # InterLRR of 3 aa at least
             if(self.motifs[i+1].start > self.motifs[i].end+3):
                 self.add_interMotif("interLRR",self.motifs[i].end+1,self.motifs[i+1].start-1)
         

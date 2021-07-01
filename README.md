@@ -1,13 +1,15 @@
 # LRRprofiler
 
-LRRprofiler is an automated program to detect and annotate LRR (Leucine-Rich Repeat) containing plant receptor.
+LRRprofiler is an automated program to detect and annotate LRR (Leucine-Rich Repeat) containing plant receptors.
 
-Please cite : ...
+Please cite : 
+ A New Comprehensive Annotation of Leucine-Rich Repeat-Containing Receptors in Rice. Gottin C., Diévart A., Summo M., Droc G., Périn C., Ranwez V. and Chantret N.
+ preprint on bioRxiv. doi: https://doi.org/10.1101/2021.01.29.428842
 
-The program was developed for Linux os.
+The program was developed on Linux os.
 
-The program uses several external tools and database:
-- iTAK 
+The program uses several external tools and databases:
+- iTAK (v1.7)
 - HMMER (v3.1b2)
 - MAFFT (v7.271)
 - TMHMM (v2.0c) [academic use only]

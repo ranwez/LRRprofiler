@@ -8,9 +8,9 @@
 # DESCRIPTION : 
 # ARGUMENTS : o $1 : Proteome (fasta)
 #             o $2 : Name
-#             o $3 : Profil RLK
-#             o $4 : Profil NLR
-#             o $5 : outdir
+#             o $3 : New Profile RLK
+#             o $4 : New Profile NLR
+#             o $5 : output directory
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
 
@@ -110,7 +110,7 @@ ln -s ${LRR_NLR} .
 ## A . SEARCH FOR LRR MOTIFS WITH HMM
 ##------------------------------------
 
-## a. Extraire les motifs LRR des differentes tables hmmsearch
+## a. Extract LRR motifs from several hmmsearch results
 
 for profile in *.hmm
 do
@@ -126,10 +126,10 @@ do
     
 done
 
-## b. Concatener les motifs trouves
+## b. Concatenate all LRR motifs
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_concat.tmp
 
-## c. Recherche motifs dans interLRR
+## c. Look for LRR motifs in interMotifs regions
 ln -s $MAIN/HMM_lib/SMART* .
 
 grep "interLRR" LRR_${NAME}_concat.tmp | gawk -F";" '($5-$4>8){print(">"$1";"$4";"$5"\n"$8)}' - > LRR_${NAME}_interLRR.fasta
@@ -148,7 +148,7 @@ do
     
 done
 
-## e. Concatener tous les motifs trouves
+## e. Concatenate all motifs
 python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS_init.csv 
 
 
@@ -156,8 +156,8 @@ python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NA
 ## B . SEARCH FOR LRR MOTIFS WITH BLAST
 ##---------------------------------------
 
-# Extraction region non LRR > 4 aa : interLRR extrait de LRR_${NAME}_ALLMOTIFS.csv et region 0-LRR et LRR-FIN (ou dependant des domaines)
-# Si NBARC ou f-box --> apres position fin domaine, si kinase --> avant position debut domaine
+# Extract noLRR regions with length over 4 aa : interLRR extracted from LRR_${NAME}_ALLMOTIFS.csv and regions 0-LRR et LRR-END
+# if NBARC or f-box --> after LRR end domain position, if kinase --> before kinase strat position
 
 gawk -F";" 'BEGIN{OFS=";"}{
      if(NR==FNR){
@@ -184,21 +184,21 @@ gawk -F";" 'BEGIN{OFS=";"}{
 
 gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/>/){if(prot!=""){print(prot,seq);prot="";seq=""};gsub(">","");prot=$1}else{gsub("*","");seq=seq""$1}}END{print(prot,seq)}' $PROTEOME | gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{if($3=="end"){end=length(SEQ[$1]);string=substr(SEQ[$1],$2);}else{string=substr(SEQ[$1],$2,$3-$2+1);end=$3};if(end-$2>10){print(">"$1";"$2";"end"\n"string)}}}' - extraLRR_dom.tmp > extraLRR_regions.fasta
 
-# creation fasta pour banque blast
+# Create fasta for blast database
 cat LRR_${NAME}_interLRR.fasta extraLRR_regions.fasta > ${NAME}_noLRR_regions.fasta
 #gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/interLRR/ && $5-$4>=8){print(">"$1,$4,$5);print($8)}}else{if($3-$2>=8){print(">"$1,$2,$3);print($4)}}}' LRR_${NAME}_ALLMOTIFS_init.csv extraLRR_regions.txt > ${NAME}_noLRR_regions.fasta
 
 makeblastdb -in ${NAME}_noLRR_regions.fasta -dbtype prot -parse_seqids
 
-# Selection des motifs LRR avec eval<5 pour fichier Query
+# Select LRR motifs with eval<5 for Query file
 gawk -F";" 'BEGIN{OFS=";"}NR>1{if($2!~/interLRR/ && $7<=5 && $6>=20 && $6<=26){print(">"$1,$4,$5);print($8)}}' LRR_${NAME}_ALLMOTIFS_init.csv > ${NAME}_LRR_seq.fasta
 
 time blastp -db ${NAME}_noLRR_regions.fasta -query ${NAME}_LRR_seq.fasta -max_hsps 2 -evalue 1.0 -out testblast.out -outfmt "6 qseqid sseqid length nident positive gaps bitscore evalue qstart qend sstart send qlen sseq"
 
-#filtre des resultats
+#filtering results
 sort -k2,2 -Vk11,11 testblast.out | gawk 'BEGIN{OFS="\t"}{if($3>7 && $5/$3>0.6){print($0)}}' - > Resblast.tmp
 
-#Reduction resultats : cheuvauchement de plus 80%, on garde la meilleure eval
+#overlopping of more than 80%, we keep the hit with best eval
 gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
       if($2==current && ((oldE-$11+1)/($12-$11))>0.8){
            if($8<evalue){
@@ -219,12 +219,12 @@ gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
 #processed
 python3.6 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
 
-##suppr csv pour eviter redondance avec etapes d'apres
+##suppr csv to avoid redumdancies with next step
 rm *${NAME}.csv
 rm *search.csv
 rm SMART_LRR_CC.csv
 
-#concat
+#concatenate
 python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS.csv
 
 #SAVE results

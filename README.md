@@ -25,15 +25,21 @@ or from the [Sylabs cloud](https://cloud.sylabs.io/library/_container/600ea38151
 
 The file LRRprofiler_v0.1_sing_3.3.def provide the corresponding singularity recipe.
 
-### Running LRRprofiler
+### Usage
 The program can be run with the command line :
 ```
-singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname>
+singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname> [--dev]
 ```
 
-The program will work if all sequence headers are parsed without description (i.e. ">OS01g10200" and not ">OS01g10200 expressed protein")
+--in_proteome: Path of the proteome fasta file. The program will work if all sequence headers are parsed without description (i.e. ">OS01g10200" and not ">OS01g10200 expressed protein")
+
+--name: Character string use for output directory and file names
+
+--dev: If provided, the pipeline will retain the working directory containing temporary files
 
 Using the example file :
 ```
 singularity run lrr_profiler0.1.sif --in_proteome Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta --name ARATH
 ```
+
+

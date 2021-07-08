@@ -1,7 +1,7 @@
 #!/bin/bash
 #========================================================
-# PROJET : LRRannotation
-# SCRIPT : LRRannotation_step0_itak.sh
+# PROJET : LRRprofiler
+# SCRIPT : LRRprofiler_step0_itak.sh
 # AUTHOR : Celine Gottin
 # CREATION : 2020.01.08
 #========================================================
@@ -21,13 +21,8 @@
 MAIN=$(pwd)
 NAME=$2
 RESDIR=$LRRPROFILER_RESDIR/Res_step0_itak
-WD=$MAIN/wd_itak_${NAME}_$(date +'%H%M%S')
 
-# working dir
-if [[ -e $WD ]];then
-    rm -r $WD
-fi
-
+WD=$LRRPROFILER_TMP/wd_itak_${NAME}
 mkdir $WD; cd $WD
 
 # files
@@ -39,7 +34,6 @@ PROTEOME=$(basename $1)
 #========================================================
 
 # running iTAK (-m p mean running itak only for kinase search, not TF)
-#perl /usr/local/bioinfo/iTAK/1.7/iTAK.pl -m p $PROTEOME
 perl $LG_ITAK -m p $PROTEOME
 
 # Saving results

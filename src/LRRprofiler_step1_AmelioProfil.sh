@@ -1,13 +1,12 @@
 #!/bin/bash
 #========================================================
-# PROJET : LRRannotation
-# SCRIPT : LRRannotation_step1_AmelioProfil.sh
+# PROJET : LRRprofiler
+# SCRIPT : LRRprofiler_step1_AmelioProfil.sh
 # AUTHOR : Celine Gottin
 # CREATION : 2020.01.08
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o --in_proteins : Proteome subset (fasta)
-#             o --list_proteins : Protein list
 #             o --in_profile : Initial Profile Path
 #             o --out_profile_name : Final Profile name
 # DEPENDENCIES : o HMMER v 3.1b2
@@ -32,7 +31,7 @@ set -o pipefail
 
 # Variables
 function quit_pb_option() {
-    printf "\nOptions : --in_proteins ; --in_profile ; --out_profile_name ; --dev\n"
+    printf "\nOptions : --in_proteins ; --in_profile ; --out_profile_name\n"
     exit 1
 }
 

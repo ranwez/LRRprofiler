@@ -1,7 +1,7 @@
 #!/bin/bash
 #========================================================
 # PROJET : LRRprofiler
-# SCRIPT : LRRannotation_step3_classification.sh
+# SCRIPT : LRRprofiler_step3_classification.sh
 # AUTHOR : Celine Gottin
 # CREATION : 2019.04.29
 #========================================================

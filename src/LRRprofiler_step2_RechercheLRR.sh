@@ -1,7 +1,7 @@
 #!/bin/bash
 #========================================================
 # PROJET : LRRprofiler
-# SCRIPT : LRRannotation_step2_RechercheLRR.sh
+# SCRIPT : LRRprofiler_step2_RechercheLRR.sh
 # AUTHOR : Celine Gottin
 # CREATION : 2020.01.09
 #========================================================
@@ -10,7 +10,6 @@
 #             o --name : Name
 #             o --rlk_profile : New Profile RLK
 #             o --nlr_profile : New Profile NLR
-#             o --dev : 
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
 
@@ -67,9 +66,6 @@ while (( $# > 0 )); do
             quit_pb_option
         fi
       ;;
-    --dev)
-        devopt=1; shift 1
-        ;;
     *)
         echo "Option $1 is unknown please ckeck your command line"
         quit_pb_option

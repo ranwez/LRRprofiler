@@ -6,11 +6,10 @@
 # CREATION : 2020.01.08
 #========================================================
 # DESCRIPTION : 
-# ARGUMENTS : o $1 : Proteome (fasta)
-#             o $2 : Protein list
-#             o $3 : initial Profile Path
-#             o $4 : Final Profile Path
-#             o $5 : Final Profile name
+# ARGUMENTS : o --in_proteins : Proteome subset (fasta)
+#             o --list_proteins : Protein list
+#             o --in_profile : Initial Profile Path
+#             o --out_profile_name : Final Profile name
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
 #========================================================
@@ -33,7 +32,7 @@ set -o pipefail
 
 # Variables
 function quit_pb_option() {
-    printf "\nOptions : --in_proteome ; --list_proteins ; --in_profile ; --out_dir ; --out_profile_name ; --dev\n"
+    printf "\nOptions : --in_proteins ; --in_profile ; --out_profile_name ; --dev\n"
     exit 1
 }
 
@@ -41,74 +40,46 @@ if (( $# == 0)); then
   quit_pb_option
 fi
 
-Proteome=""
-ListProt=""
+Proteins=""
 initProfile=""
 OUT_DIR="RES_step1_AmelioProfile_$(date +'%Y%m%d_%H%M%S')"
-outname="new_profile.hmm"
+outname="new_LRR_profile.hmm"
 itMax=15
-
-devopt=0
 
 while (( $# > 0 )); do
     case "$1" in
-	--in_proteome)
-	    Proteome=$(readlink -f "$2"); shift 2;
-	    if [[ ! -f $Proteome ]];then
-		    echo "File $Proteome does not exist"
-		    quit_pb_option	
-	    fi
-	    ;;
-	--list_proteins)
-	    ListProt=$(readlink -f "$2"); shift 2;
-	    if [[ ! -f $ListProt ]];then
-		    echo "File $ListProt does not exist"
-		    quit_pb_option	
-	    fi
-	    ;;
-	--in_profile)
-	    initProfile=$(readlink -f "$2"); shift 2;
-	    if [[ ! -f $initProfile ]];then
-		    echo "File $initProfile does not exist"
-		    quit_pb_option
-	    fi
-	    ;;
-  --out_dir)
-      OUT_DIR="$2"; shift 2;
-      if [ ! -e  $OUT_DIR ]; then
-        mkdir "$OUT_DIR"
-      fi
-      ;;
-	--out_profile_name)
-	    outname="$2"; shift 2
-	    ;;
-  --dev)
-      devopt=1; shift 1
-      ;;
-	*)
+    --in_proteins)
+        Proteins=$(readlink -f "$2"); shift 2;
+        if [[ ! -f $Proteins ]];then
+            echo "File $Proteins does not exist"
+            quit_pb_option
+        fi
+        ;;
+    --in_profile)
+        initProfile=$(readlink -f "$2"); shift 2;
+        if [[ ! -f $initProfile ]];then
+            echo "File $initProfile does not exist"
+            quit_pb_option
+        fi
+        ;;
+    --out_profile_name)
+        outname="$2"; shift 2
+        ;;
+    *)
       echo "Option $1 is unknown please ckeck your command line"
       quit_pb_option
       ;;
     esac
 done
 
-#for param in $Proteome $initProfile $ListProt
-#do
-#    if [[ $param -eq "" ]];then
-#	echo "error : mandatory parameter is missing"
-#    fi
-#done
-
-
+if [[ -e $LRRPROFILER_RESDIR ]];then
+    OUT_DIR=$LRRPROFILER_RESDIR/Res_step1
+fi
 
 MAIN=$(pwd)
 
 # Working dir
-WD=wd_amelioProfil_$(date +'%H%M%S')
-
-if [[ -e $WD ]];then
-    rm -r $WD
-fi
+WD=$LRRPROFILER_TMP/wd_amelioProfil
 
 mkdir $WD ; cd $WD
 
@@ -127,14 +98,11 @@ echo "============================================="
 #--------------------------------------------------------------------
 # 1. Extract protein sample from protein List
 
-gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $ListProt $Proteome > proteome_tmp.fasta
+nbPf=$(grep -c ">" $Proteins)
 
-nbPf=$(grep -c ">" proteome_tmp.fasta)
-nbPe=$(grep -c . $ListProt)
+echo -e "\nFound $nbPf proteins in $Proteins file."
 
-echo "found $nbPf proteins over $nbPe expected in the list"
-
-gawk 'BEGIN{OFS=";";protName=""}{if($1~/^>/){if(length(protName)>1){print(protName,sequence)};gsub(">","");protName=$1;sequence=""}else{sequence=sequence""$1}}END{print(protName,sequence)}' proteome_tmp.fasta > proteome_tmp.csv
+gawk 'BEGIN{OFS=";";protName=""}{if($1~/^>/){if(length(protName)>1){print(protName,sequence)};gsub(">","");protName=$1;sequence=""}else{sequence=sequence""$1}}END{print(protName,sequence)}' $Proteins > proteome_tmp.csv
 
 #--------------------------------------------------------------------
 # 2. Iterative search of LRR repeat
@@ -165,7 +133,7 @@ do
 
 # a) execute hmmsearch the output file contain comment lines starting with # that should be ignored
     
-    hmmsearch -E 1000 --domE 1000 -o del.tmp --nobias --noali --domtblout HMMres${it}.tmp ${profile} proteome_tmp.fasta 
+    hmmsearch -E 1000 --domE 1000 -o /dev/null --nobias --noali --domtblout HMMres${it}.tmp ${profile} $Proteins 
 
     nbProtOld=$nbProt
     nbProt=$(grep -v "^#"  HMMres${it}.tmp | cut -f1 -d" "| sort -u | wc -l)
@@ -202,25 +170,26 @@ do
     nbChar=$(tail -1 RES_construction_profile.txt | cut -f8) ;
 
     if (( nbChar <= nbCharOld ));then
-	let penalty=${penalty}+1;
+        let penalty=${penalty}+1;
     fi
 
-#    if (( $nbProt > $nbProtOld || (( $nbProt == $nbProtOld && $nbMotifs >  $nbMotifsOld )) )) ; then # we have a better HMM
-#	penalty=0;
-#    elif ((  $nbProt == $nbProtOld &&  $nbMotifs <=  $nbMotifsOld )) ;  then # we have an equivalent HMM, use a moderate penalty (stop after 3 such iterations) 
-#	let penalty=${penalty}+2;
- #   else # we got a worse HMM use a higher penalty (stop after 2 such iterations)
-#	les penalty=${penalty}+3;
-#    fi
-
     if (( $penalty >= 3 ));then
-	break ;
+        break ;
     fi
 
 
 # e) extract LRR motifs from the protein sequence
 
-    gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{len=$7-$6+1;L[$1]=len;seq=substr(SEQ[$1],$6,L[$1]);print(">"$1"."$2);print(seq)}}' proteome_tmp.csv motifs.tmp > motifsIt${it}.fasta
+    gawk -F";" 'BEGIN{OFS=";"}{
+                    if(NR==FNR){
+                        SEQ[$1]=$2}
+                    else{
+                        len=$7-$6+1;
+                        L[$1]=len;
+                        seq=substr(SEQ[$1],$6,L[$1]);
+                        print(">"$1"."$2);
+                        print(seq)}
+                }' proteome_tmp.csv motifs.tmp > motifsIt${it}.fasta
 
 
 # f) Align sequence using MAFFT and build new profile
@@ -247,7 +216,7 @@ done
 ##we select the profile with the best results (max number of amino acids identified within repeats)
 best=$(gawk 'BEGIN{nb=0}{if($8>nb){nb=$8;profile=$1}}END{print(profile)}' RES_construction_profile.txt)
 
-echo "Conserve $best"
+echo "Retrieve $best as best profile"
 
 
 if [[ ! -e $OUT_DIR ]];then
@@ -256,17 +225,11 @@ fi
 
 
 gawk -v name=${outname%.hmm} '{if(NR==2){$2=name};print}' $best > $OUT_DIR/${outname}
+echo "moving HMM file ${outname} to $OUT_DIR/ "
 cp RES_construction_profile.txt $OUT_DIR/${outname%.hmm}.log
-echo "moving logfile ${outname%.hmm}.log to $OUT_DIR/ "
-cp $ListProt $OUT_DIR/.
-echo "moving list $ListProt to $OUT_DIR/ "
-
+echo "moving log file ${outname%.hmm}.log to $OUT_DIR/ "
 
 cd $MAIN ;
-
-if [[ $devopt -eq 0 ]];then
-   rm -r $WD
-fi
 
 echo "END STEP 1"
 

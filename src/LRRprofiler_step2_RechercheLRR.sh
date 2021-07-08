@@ -6,11 +6,11 @@
 # CREATION : 2020.01.09
 #========================================================
 # DESCRIPTION : 
-# ARGUMENTS : o $1 : Proteome (fasta)
-#             o $2 : Name
-#             o $3 : New Profile RLK
-#             o $4 : New Profile NLR
-#             o $5 : output directory
+# ARGUMENTS : o --in_proteome : Proteome (fasta)
+#             o --name : Name
+#             o --rlk_profile : New Profile RLK
+#             o --nlr_profile : New Profile NLR
+#             o --dev : 
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
 
@@ -21,7 +21,6 @@
 #                Environment & variables
 #========================================================
 
-# variables
 function quit_pb_option() {
     printf "\nOptions : --in_proteome ; --name ; --rlk_profile ; --nlr_profile ; --out_dir ; --dev\n"
     exit 1
@@ -36,7 +35,7 @@ SCRIPT=${LG_SCRIPT}
 
 PROTEOME=""
 NAME="LRRprofiler"
-OUT_DIR="" 
+OUT_DIR="RES_step2_LRRsearch_$(date +'%Y%m%d_%H%M%S')" 
 LRR_RLK=""
 LRR_NLR=""
 
@@ -44,66 +43,64 @@ devopt=0
 
 while (( $# > 0 )); do
     case "$1" in
-	--in_proteome)
-	    PROTEOME=$(readlink -f "$2"); shift 2;
-	    if [[ ! -f $PROTEOME ]];then
-		    echo "File $PROTEOME does not exist"
-		    quit_pb_option	
-	    fi
-	    ;;
-	--name)
-	    NAME="$2"; shift 2
-	    ;;
-	--rlk_profile)
-	    LRR_RLK=$(readlink -f "$2"); shift 2;
-	    if [[ ! -f $LRR_RLK ]];then
-		    echo "File $LRR_RLK does not exist"
-		    quit_pb_option
-	    fi
-	    ;;
-	--nlr_profile)
-      LRR_NLR=$(readlink -f "$2"); shift 2;
-      if [ ! -f  $LRR_NLR ]; then
-        echo "File $LRR_NLR does not exist"
-		    quit_pb_option
-      fi
-      ;;
-	--out_dir)
-      OUT_DIR="$2"; shift 2;
-      if [ ! -e  $OUT_DIR ]; then
-        mkdir "$OUT_DIR"
-      fi
-	    ;;
-	--dev)
-      devopt=1; shift 1
-      ;;
-	*)
-            echo "Option $1 is unknown please ckeck your command line"
+    --in_proteome)
+        PROTEOME=$(readlink -f "$2"); shift 2;
+        if [[ ! -f $PROTEOME ]];then
+            echo "File $PROTEOME does not exist"
             quit_pb_option
-            ;;
+        fi
+        ;;
+    --name)
+        NAME="$2"; shift 2
+        ;;
+    --rlk_profile)
+        LRR_RLK=$(readlink -f "$2"); shift 2;
+        if [[ ! -f $LRR_RLK ]];then
+            echo "File $LRR_RLK does not exist"
+            quit_pb_option
+        fi
+        ;;
+    --nlr_profile)
+        LRR_NLR=$(readlink -f "$2"); shift 2;
+        if [ ! -f  $LRR_NLR ]; then
+            echo "File $LRR_NLR does not exist"
+            quit_pb_option
+        fi
+      ;;
+    --dev)
+        devopt=1; shift 1
+        ;;
+    *)
+        echo "Option $1 is unknown please ckeck your command line"
+        quit_pb_option
+        ;;
     esac
 done
 
 
-# working dir
-WD=$MAIN/wd_rechercheLRR_${NAME}_$(date +'%H%M%S')
-
-if [[ -e $WD ]];then
-    rm -r $WD
+if [[ -e $LRRPROFILER_RESDIR ]];then
+    OUT_DIR=$LRRPROFILER_RESDIR/Res_step2
 fi
 
+
+WD=$LRRPROFILER_TMP/wd_LRRsearch_${NAME}
 mkdir $WD; cd $WD
 
 #========================================================
 #                       SCRIPT
 #========================================================
 
-cat $MAIN/Res_$NAME/Res_step1/Liste* > ${NAME}_PriorClassif.txt
+cat $LRRPROFILER_TMP/Liste* > ${NAME}_PriorClassif.txt
 
 ln -s ${LG_HMMlib}/SMART_LRR_*.hmm .
 ln -s ${LG_HMMlib}/LRR_NLR_ORYSJ_canonic_refined.hmm .
-ln -s ${LRR_RLK} .
-ln -s ${LRR_NLR} .
+
+for hmm in ${LRR_RLK} ${LRR_NLR}
+do
+    if [[ -f ${hmm} ]];then
+        ln -s ${hmm} .
+    fi
+done
 
 
 
@@ -115,41 +112,38 @@ ln -s ${LRR_NLR} .
 for profile in *.hmm
 do
     outfile=${profile%.hmm}.tbl
-    
     hmmsearch -o del.tmp -E 1000 --domE 1000 -Z 500 --nobias --noali --domtblout ${outfile} $profile $PROTEOME
 
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
-	    rm ${outfile} #empty file
+        rm ${outfile} #empty file
     else
-	    python3.6 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}.csv
+        python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}.csv
     fi
     
 done
 
 ## b. Concatenate all LRR motifs
-python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_concat.tmp
+python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_concat.tmp
 
 ## c. Look for LRR motifs in interMotifs regions
-ln -s $MAIN/HMM_lib/SMART* .
 
 grep "interLRR" LRR_${NAME}_concat.tmp | gawk -F";" '($5-$4>8){print(">"$1";"$4";"$5"\n"$8)}' - > LRR_${NAME}_interLRR.fasta
 
 for profile in *.hmm
 do
     outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
-    
     hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
 
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
-	    rm ${outfile} #enpty file
+        rm ${outfile} #enpty file
     else
-	    python3.6 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $(pwd)/${outfile%.tbl}.csv
+        python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $WD/${outfile%.tbl}.csv
     fi
     
 done
 
-## e. Concatenate all motifs
-python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS_init.csv 
+## d. Concatenate all motifs
+python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv 
 
 
 
@@ -157,7 +151,7 @@ python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NA
 ##---------------------------------------
 
 # Extract noLRR regions with length over 4 aa : interLRR extracted from LRR_${NAME}_ALLMOTIFS.csv and regions 0-LRR et LRR-END
-# if NBARC or f-box --> after LRR end domain position, if kinase --> before kinase strat position
+# if NBARC --> after LRR end domain position, if kinase --> before kinase strat position
 
 gawk -F";" 'BEGIN{OFS=";"}{
      if(NR==FNR){
@@ -217,7 +211,7 @@ gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
 }' Resblast.tmp > Resblast.txt
 
 #processed
-python3.6 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
 
 ##suppr csv to avoid redumdancies with next step
 rm *${NAME}.csv
@@ -225,17 +219,13 @@ rm *search.csv
 rm SMART_LRR_CC.csv
 
 #concatenate
-python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $(pwd) -o $(pwd)/LRR_${NAME}_ALLMOTIFS.csv
+python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS.csv
 
 #SAVE results
 cp LRR_${NAME}_ALLMOTIFS.csv $OUT_DIR/.
 cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 
 cd $MAIN 
-
-if [[ $devopt -eq 0 ]];then
-  rm -r $WD
-fi
 
 echo "END STEP 2"
 

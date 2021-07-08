@@ -8,8 +8,6 @@
 # DESCRIPTION : 
 # ARGUMENTS : o $1 : Proteome Path (fasta)
 #             o $2 : NAME
-#             o $3 : Res dir path
-#             o $4 : output file name
 # DEPENDENCIES : o iTAK v 1.7               
 #========================================================
 
@@ -22,8 +20,7 @@
 # Variables
 MAIN=$(pwd)
 NAME=$2
-RESDIR=$3
-FNAME=$4
+RESDIR=$LRRPROFILER_RESDIR/Res_step0_itak
 WD=$MAIN/wd_itak_${NAME}_$(date +'%H%M%S')
 
 # working dir
@@ -50,7 +47,7 @@ if [[ ! -e $RESDIR ]];then
     mkdir -p $RESDIR
 fi
 
-cp ${PROTEOME}_output/shiu_alignment.txt $RESDIR/$FNAME
+cp ${PROTEOME}_output/shiu_alignment.txt $RESDIR/${NAME}_shiu_alignment.txt
 
 # Cleaning
 cd $MAIN ; rm -r $WD

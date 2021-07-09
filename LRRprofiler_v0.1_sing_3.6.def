@@ -52,22 +52,25 @@ iTAK
 	apt-get -y install pandoc-data
 	apt-get -y install pandoc
 	apt-get -y install bioperl
+	#apt-get -y install subversion
+	apt-get -y install git
 	apt-get -y update
-	apt-get -y install subversion
 
 ## getting scripts from github
-	svn checkout https://github.com/kentnf/iTAK/trunk/
-	mv trunk iTAK
+	#svn checkout https://github.com/kentnf/iTAK/trunk/
+	#mv trunk iTAK
+	git clone https://github.com/kentnf/iTAK.git
 	chmod -R 777 /iTAK/
 
-	svn checkout https://github.com/cgottin/LRRprofiler/dev/src/
-	svn checkout https://github.com/cgottin/LRRprofiler/dev/HMM_lib/
-	svn checkout https://github.com/cgottin/LRRprofiler/dev/example
-	chmod 777 /src/*
+	#svn checkout https://github.com/cgottin/LRRprofiler/dev/src/
+	#svn checkout https://github.com/cgottin/LRRprofiler/dev/HMM_lib/
+	#svn checkout https://github.com/cgottin/LRRprofiler/dev/example
+	git clone --single-branch --branch dev https://github.com/cgottin/LRRprofiler.git
+	chmod 777 /LRRprofiler/src/*
 
 	tar -xf /tmhmm2.0c.tar
 
-	apt-get purge -y --auto-remove subversion wget unzip
+	apt-get purge -y --auto-remove wget unzip git #subversion
 
 # running iTAK on test set to set up files
 	perl /iTAK/iTAK.pl /iTAK/test_seq
@@ -82,8 +85,8 @@ iTAK
 
 %environment
 	export LC_ALL=C
-	export LG_SCRIPT="/src"
-	export LG_HMMlib="/HMM_lib"
+	export LG_SCRIPT="/LRRprofiler/src"
+	export LG_HMMlib="/LRRprofiler/HMM_lib"
 	export LG_MAFFT="mafft"
 	export LG_ITAK="/iTAK/iTAK.pl"
 	export LG_TMHMM="/tmhmm2.0c/bin/tmhmm"
@@ -95,7 +98,7 @@ iTAK
 
 
 %runscript
-	exec bash /src/LRRprofiler_global.sh "$@"
+	exec bash /LRRprofiler/src/LRRprofiler_global.sh "$@"
 
 %labels
 	Author Céline Gottin & Vincent Ranwez

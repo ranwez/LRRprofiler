@@ -168,7 +168,7 @@ echo -e "--------------------------------\n"
 
 
 if [[ ! -e $LRRPROFILER_RESDIR/Res_step2 ]];then
-    $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm --out_dir $LRRPROFILER_RESDIR/Res_step2
+    $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm
 else
     echo -e "Found results for step 2; skipping step 2\n"
 fi
@@ -180,7 +180,7 @@ echo -e "\n-----------------------------------------------"
 echo "  STEP 3 : Sequence annotation & classification"
 echo -e "-----------------------------------------------\n"
 
-$SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME --out_dir $LRRPROFILER_RESDIR/Res_step3
+$SCRIPT/LRRprofiler_step3_classification.sh --in_proteome $PROTEOME --name $NAME
 
 
 ## cleaning

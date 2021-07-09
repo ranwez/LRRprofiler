@@ -152,7 +152,7 @@ else
         echo -e "Running step 1 for LRR-NLR motifs"
         gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeNBARC.txt $PROTEOME > $LRRPROFILER_TMP/subproteome_NBARC.fasta
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteins $LRRPROFILER_TMP/subproteome_NBARC.fasta --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_profile_name LRR_NLR_$NAME.hmm
-        cp $LRRPROFILER_TMP/ListeNBARC.txt
+        cp $LRRPROFILER_TMP/ListeNBARC.txt $LRRPROFILER_RESDIR/Res_step1/.
         echo "moving list ListeNBARC.txt to $LRRPROFILER_RESDIR/Res_step1/ "
     else
         echo -e "Found profile for LRR-NLR motifs; skipping step 1 for NB-ARC protein\n"

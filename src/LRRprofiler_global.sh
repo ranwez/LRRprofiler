@@ -90,7 +90,7 @@ done
 MAIN=$(pwd)
 SCRIPT=${LG_SCRIPT}
 
-LRRPROFILER_TMP=$MAIN/tmp_$(date +'%Y%m%d_%H%M%S')
+LRRPROFILER_TMP=$MAIN/tmp_LRRprofiler_$(date +'%Y%m%d_%H%M%S')
 export LRRPROFILER_TMP
 mkdir $LRRPROFILER_TMP 
 

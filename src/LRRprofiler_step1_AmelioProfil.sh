@@ -77,7 +77,7 @@ fi
 MAIN=$(pwd)
 
 # Working dir
-WD=$LRRPROFILER_TMP/wd_amelioProfil
+WD=$LRRPROFILER_TMP/wd_amelioProfil_${outname%.hmm}
 
 mkdir $WD ; cd $WD
 

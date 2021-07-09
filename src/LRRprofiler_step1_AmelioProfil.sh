@@ -3,7 +3,6 @@
 # PROJET : LRRprofiler
 # SCRIPT : LRRprofiler_step1_AmelioProfil.sh
 # AUTHOR : Celine Gottin
-# CREATION : 2020.01.08
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o --in_proteins : Proteome subset (fasta)

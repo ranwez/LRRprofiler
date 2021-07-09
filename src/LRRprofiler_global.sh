@@ -59,8 +59,8 @@ while (( $# > 0 )); do
     --in_proteome)
         PROTEOME=$(readlink -f "$2"); shift 2;
         if [[ ! -f $PROTEOME ]];then
-            echo "File $Proteome does not exist"
-            quit_pb_option	
+            echo "File $PROTEOME does not exist"
+            quit_pb_option
         fi
         echo "    proteome file is $PROTEOME"
         ;;

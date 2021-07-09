@@ -3,7 +3,6 @@
 # PROJET : LRRprofiler
 # SCRIPT : LRRprofiler_step3_classification.sh
 # AUTHOR : Celine Gottin
-# CREATION : 2019.04.29
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o $1 : Proteome (fasta)

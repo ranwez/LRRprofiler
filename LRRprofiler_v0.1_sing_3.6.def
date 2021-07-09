@@ -11,7 +11,7 @@ This container launches the LRRprofiler pipeline used to annot proteins with Leu
     usage (basic)  : singularity run LRRprofiler_v0.1.sif --in_proteome <fasta file> --name <string>
     usage (example): singularity run LRRprofiler_v0.1.sif --in_proteome example/Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta --name ARATH 
 
-    building container : singularity build LRRprofiler_v0.1.sif LRRprofiler_v0.1_sing_3.3.def
+    building container : singularity build LRRprofiler_v0.1.sif LRRprofiler_v0.1_sing_3.6.def
 
 For more details please see the pipeline documentation pages on the LRRprofiler website:
 ==================================================================================
@@ -60,9 +60,9 @@ iTAK
 	mv trunk iTAK
 	chmod -R 777 /iTAK/
 
-	svn checkout https://github.com/cgottin/LRRprofiler/trunk/src/
-	svn checkout https://github.com/cgottin/LRRprofiler/trunk/HMM_lib/
-	svn checkout https://github.com/cgottin/LRRprofiler/trunk/example
+	svn checkout https://github.com/cgottin/LRRprofiler/dev/src/
+	svn checkout https://github.com/cgottin/LRRprofiler/dev/HMM_lib/
+	svn checkout https://github.com/cgottin/LRRprofiler/dev/example
 	chmod 777 /src/*
 
 	tar -xf /tmhmm2.0c.tar

@@ -3,7 +3,6 @@
 # PROJET : LRRprofiler
 # SCRIPT : LRRprofiler_step2_RechercheLRR.sh
 # AUTHOR : Celine Gottin
-# CREATION : 2020.01.09
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o --in_proteome : Proteome (fasta)
@@ -12,7 +11,6 @@
 #             o --nlr_profile : New Profile NLR
 # DEPENDENCIES : o HMMER v 3.1b2
 #                o MAFFT v 7.313
-
 #========================================================
 
 

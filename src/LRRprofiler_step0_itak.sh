@@ -3,7 +3,6 @@
 # PROJET : LRRprofiler
 # SCRIPT : LRRprofiler_step0_itak.sh
 # AUTHOR : Celine Gottin
-# CREATION : 2020.01.08
 #========================================================
 # DESCRIPTION : 
 # ARGUMENTS : o $1 : Proteome Path (fasta)

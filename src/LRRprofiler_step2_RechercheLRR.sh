@@ -216,6 +216,7 @@ rm SMART_LRR_CC.csv
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS.csv
 
 #SAVE results
+mkdir $OUT_DIR
 cp LRR_${NAME}_ALLMOTIFS.csv $OUT_DIR/.
 cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 

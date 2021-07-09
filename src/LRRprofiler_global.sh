@@ -139,7 +139,7 @@ else
     # A. LRR-RLK
     if [[ ! -e $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm ]]; then
         echo -e "Running step 1 for LRR-RLK motifs"
-        gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeKinase.txt $Proteome > $LRRPROFILER_TMP/subproteome_kinase.fasta
+        gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeKinase.txt $PROTEOME > $LRRPROFILER_TMP/subproteome_kinase.fasta
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteome $LRRPROFILER_TMP/subproteome_kinase.fasta --in_profile $LG_HMMlib/SMART_LRR.hmm --out_profile_name LRR_kinase_${NAME}.hmm
         cp $LRRPROFILER_TMP/ListeKinase.txt $LRRPROFILER_RESDIR/Res_step1/.
         echo "moving list ListeKinase.txt to $LRRPROFILER_RESDIR/Res_step1/ "
@@ -150,7 +150,7 @@ else
     # B. NLR
     if [[ ! -e $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_${NAME}.hmm ]]; then
         echo -e "Running step 1 for LRR-NLR motifs"
-        gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeNBARC.txt $Proteome > $LRRPROFILER_TMP/subproteome_NBARC.fasta
+        gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeNBARC.txt $PROTEOME > $LRRPROFILER_TMP/subproteome_NBARC.fasta
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteins $LRRPROFILER_TMP/subproteome_NBARC.fasta --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_profile_name LRR_NLR_$NAME.hmm
         cp $LRRPROFILER_TMP/ListeNBARC.txt
         echo "moving list ListeNBARC.txt to $LRRPROFILER_RESDIR/Res_step1/ "

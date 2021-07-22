@@ -112,13 +112,14 @@ do
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
         rm ${outfile} #empty file
     else
-        python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}.csv
+        python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}_search.csv
     fi
     
 done
 
 ## b. Concatenate all LRR motifs
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_concat.tmp
+
 
 ## c. Look for LRR motifs in interMotifs regions
 
@@ -138,9 +139,10 @@ do
 done
 
 ## d. Concatenate all motifs
-python3.6 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv 
+python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv 
 
-
+##suppr csv to avoid redumdancies with next step
+rm *search.csv
 
 ## B . SEARCH FOR LRR MOTIFS WITH BLAST
 ##---------------------------------------
@@ -207,11 +209,6 @@ gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
 
 #processed
 python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
-
-##suppr csv to avoid redumdancies with next step
-rm *${NAME}.csv
-rm *search.csv
-rm SMART_LRR_CC.csv
 
 #concatenate
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS.csv

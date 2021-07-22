@@ -139,7 +139,7 @@ gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || 
 #   - pct2 = % of NLR type motifs
 
 #  if pct1 > 65% and more than 13 motifs in protein => RLP
-#  if pct1> 10% and pct2 > 40% and pct1+pct2>90% => PIRL
+#  if pct1> 10% and pct2 > 40% and pct1+pct2>90% => PIRL // not yet validated
 #gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS[$1]++}else{if($2~/LRR_NLR/){NLR[$1]++}}}}else{pct=PS[$1]/LRR[$1];if(pct>0.65 && PS[$1]>13){print($1,"RLP")}else{pct2=NLR[$1]/LRR[$1];if(pct2>0.4 && pct>0.1 && pct+pct2>0.9){print($1,"PIRL")}else{print($1,"other")}}}}' LRR_domains_filtered.csv putativeRLP.tmp >> LRR_classification.tmp
 gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS[$1]++}else{if($2~/LRR_NLR/){NLR[$1]++}}}}else{pct=PS[$1]/LRR[$1];if(pct>0.65 && PS[$1]>13){print($1,"RLP")}else{print($1,"other")}}}' LRR_domains_filtered.csv putativeRLP.tmp >> LRR_classification.tmp
 

@@ -168,7 +168,11 @@ echo -e "--------------------------------\n"
 
 
 if [[ ! -e $LRRPROFILER_RESDIR/Res_step2 ]];then
-    $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm
+    if [[ $nobuild -eq 1 ]];then
+        $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME
+	else
+		$SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm
+	fi
 else
     echo -e "Found results for step 2; skipping step 2\n"
 fi

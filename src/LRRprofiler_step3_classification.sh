@@ -121,7 +121,7 @@ gawk -F";" 'BEGIN{OFS=";"}{
 gawk -F";" 'BEGIN{OFS=";";prot=""}{if(prot!=$1){prot=$1;lim=0};if($2!~/BLAST/){if($4>lim){print;lim=$4}}else{if($3>lim){print}}}' LRR_domains_filtered.tmp > tmp
 
 ## if less than 24aa from TM --> suppr; if less than 60 aa from start --> suppr; if less than 40 aa after NBARC --> suppr
-gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/TM/){Lim[$1]=$(3)-24};if($2~/NBARC/){Lim2[$1]=$(4)+40}}else{if($2~/BLAST/ && $3<60){NEXT}else{if(Lim[$1]!="" && $2~/BLAST/ && $4>Lim[$1]){NEXT}else{if(Lim2[$1]!="" && $2~/BLAST/ && $3<Lim2[$1]){NEXT}else{print}}}}}' tmp tmp > LRR_domains_filtered.csv
+gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/TM/){Lim[$1]=$(3)-24};if($2~/NB-ARC/){Lim2[$1]=$(4)+40}}else{if($2~/BLAST/ && $3<60){NEXT}else{if(Lim[$1]!="" && $2~/BLAST/ && $4>Lim[$1]){NEXT}else{if(Lim2[$1]!="" && $2~/BLAST/ && $3<Lim2[$1]){NEXT}else{print}}}}}' tmp tmp > LRR_domains_filtered.csv
 
 rm *.tmp
 
@@ -132,7 +132,7 @@ gawk -F";" 'BEGIN{OFS=";"}{if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}END{for(i i
 #gawk -F";" 'BEGIN{OFS=";"}{if($2!~/LRR/){if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}}END{for(i in P){print(i,P[i])}}' LRR_domains_filtered.csv > tmp
 
 ## Classif RLK; NLR and f-box
-gawk -F";" 'BEGIN{OFS=";"}{if($2~/NBARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp
+gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp
 
 ## For putative RLP : 
 #   - pct = % of PS type motifs

@@ -69,6 +69,7 @@ iTAK
 	chmod 777 /LRRprofiler/src/*
 
 	tar -xf /tmhmm2.0c.tar
+	chmod -R 777 /tmhmm2.0c/
 
 	apt-get purge -y --auto-remove wget unzip git #subversion
 

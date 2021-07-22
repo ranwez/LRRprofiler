@@ -88,6 +88,7 @@ cat $LRRPROFILER_TMP/Liste* > ${NAME}_PriorClassif.txt
 
 ln -s ${LG_HMMlib}/SMART_LRR_*.hmm .
 ln -s ${LG_HMMlib}/LRR_NLR_ORYSJ_canonic_refined.hmm .
+ln -s ${LG_HMMlib}/LRR_NLR_ARATH.hmm .
 
 for hmm in ${LRR_RLK} ${LRR_NLR}
 do

@@ -161,9 +161,23 @@ R CMD BATCH '--args $(pwd)' render.R
 # SAVE results
 mkdir -p $OUT_DIR
 
-cp LRR_classification.csv $OUT_DIR/.
-cp LRR_domains_filtered.csv $OUT_DIR/.
-cp LRR_structure.html $OUT_DIR/.
+if [[ ! -e LRR_classification.csv ]];then
+   echo "File LRR_classification does not exist. Process has failed"
+else
+    cp LRR_classification.csv $OUT_DIR/.
+fi
+
+if [[ ! -e LRR_domains_filtered.csv ]];then
+   echo "File LRR_domains_filtered does not exist. Process has failed"
+else
+    cp LRR_domains_filtered.csv $OUT_DIR/.
+fi
+
+if [[ ! -e LRR_structure.html ]];then
+    echo "File LRR_structure.html was not created. This could be due to memory error."
+else
+    cp LRR_structure.html $OUT_DIR/.
+fi
 
 cd $MAIN 
 

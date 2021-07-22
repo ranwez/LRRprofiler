@@ -28,7 +28,7 @@ The file LRRprofiler_v0.1_sing_3.3.def provide the corresponding singularity rec
 ### Usage
 The program can be run with the command line :
 ```
-singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname> [--dev]
+singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname> [--dev] [--nobuild]
 ```
 
 Using the example file :
@@ -39,10 +39,11 @@ singularity run lrr_profiler0.1.sif --in_proteome Arabidopsis_Thaliana_reviewed_
 #### Pipeline options
 --in_proteome: (mandatory) Path of the proteome fasta file. Currently, the program will work if all sequence headers are parsed without description (i.e. ">OS01g10200" and not ">OS01g10200 expressed protein")
 
---name: (mandatory) Character string use for output directory and file names
+--name: (mandatory) Character string use for output directory and file names.
 
---dev: (optional) If provided, the pipeline will retain the working directory containing temporary files
+--dev: (optional) If provided, the pipeline will retain the working directory containing temporary files.
 
+--nobuild: (optional) If porvided, skip the profile refinement process and use exclusively profiles from the HMM_lib folder. This option can be useful to obtain homogeneous and reproductible annotation when comparing several proteomes.
 
 
 

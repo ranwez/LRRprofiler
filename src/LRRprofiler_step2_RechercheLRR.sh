@@ -161,7 +161,7 @@ gawk -F";" 'BEGIN{OFS=";"}{
      else{
           if($2!~/interLRR/){
                if($1!=prot){
-                    if(CLASS[$1]!~/NBARC/ || (CLASS[$1]~/NBARC/ && $4>lim2[$1])){prot=$1;S[$1]=$(4)-1;E[$1]=$(5)+1};}
+                    if(CLASS[$1]!~/NB-ARC/ || (CLASS[$1]~/NB-ARC/ && $4>lim2[$1])){prot=$1;S[$1]=$(4)-1;E[$1]=$(5)+1};}
                else{
                     if(CLASS[$1]!~/Kinase/ || (CLASS[$1]~/Kinase/ && $5<lim1[$1])){E[$1]=$(5)+1}}}}
 }END{for(i in S){

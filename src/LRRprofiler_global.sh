@@ -130,7 +130,7 @@ echo -e "----------------------------\n"
 gawk '{print($1,$3,$4)}' $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"Kinase",start,end)}' > $LRRPROFILER_TMP/ListeKinase.txt
 
 hmmsearch -o /dev/null -Z 35000 --nobias --noali --domtblout $LRRPROFILER_TMP/NBARC.tbl ${LG_HMMlib}/NB-ARC.hmm $PROTEOME
-gawk '$1!~/#/{print($1,$18,$19)}' $LRRPROFILER_TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NBARC",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"NBARC",start,end)}' > $LRRPROFILER_TMP/ListeNBARC.txt
+gawk '$1!~/#/{print($1,$18,$19)}' $LRRPROFILER_TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NB-ARC",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"NB-ARC",start,end)}' > $LRRPROFILER_TMP/ListeNBARC.txt
 
 
 if [[ $nobuild -eq 1 ]];then

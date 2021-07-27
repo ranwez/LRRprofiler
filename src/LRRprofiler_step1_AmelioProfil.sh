@@ -87,9 +87,8 @@ mkdir $WD ; cd $WD
 #========================================================
 
 echo "============================================="
-echo "Proteome : $(basename $Proteome)"
+echo "Proteins : $(basename $Proteins)"
 echo "Initial Profile : $(basename $initProfile)"
-echo "List of proteins : $(basename $ListProt)"
 echo "Max number of iteration : $itMax "
 echo "============================================="
 

@@ -150,13 +150,16 @@ gawk -F"[; ]" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/ || $2~/BLAST/){P[$1]++}}el
 
 ## f. structure 
 cp $SCRIPT/LRR_structure.Rmd .
-cp $SCRIPT/render.R .
-#cat > render.R <<EOF
-#library(rmarkdown)
-#render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(domains="${WD}/LRR_domains_filtered.csv",sizes="${WD}/LRR_prot_size.csv",class="${WD}/LRR_classification.csv"))
-#EOF
+#cp $SCRIPT/render.R .
+#R CMD BATCH '--args $(pwd)' render.R
 
-R CMD BATCH '--args $(pwd)' render.R
+cat > render.R <<EOF
+library(rmarkdown)
+render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(wd="${WD}"))
+EOF
+
+R CMD BATCH render.R
+
 
 # SAVE results
 mkdir -p $OUT_DIR
@@ -173,11 +176,11 @@ else
     cp LRR_domains_filtered.csv $OUT_DIR/.
 fi
 
-if [[ ! -e LRR_structure.html ]];then
-    echo "File LRR_structure.html was not created. This could be due to memory error."
-else
-    cp LRR_structure.html $OUT_DIR/.
-fi
+#if [[ ! -e LRR_structure.html ]];then
+#    echo "File LRR_structure.html was not created. This could be due to memory error."
+#else
+#    cp LRR_structure.html $OUT_DIR/.
+#fi
 
 cd $MAIN 
 

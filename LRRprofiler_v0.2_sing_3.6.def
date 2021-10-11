@@ -62,10 +62,7 @@ iTAK
 	git clone https://github.com/kentnf/iTAK.git
 	chmod -R 777 /iTAK/
 
-	#svn checkout https://github.com/cgottin/LRRprofiler/dev/src/
-	#svn checkout https://github.com/cgottin/LRRprofiler/dev/HMM_lib/
-	#svn checkout https://github.com/cgottin/LRRprofiler/dev/example
-	git clone --single-branch --branch dev https://github.com/cgottin/LRRprofiler.git
+	git clone --single-branch --branch master https://github.com/cgottin/LRRprofiler.git
 	chmod 777 /LRRprofiler/src/*
 
 	tar -xf /tmhmm2.0c.tar

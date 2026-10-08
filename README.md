@@ -15,25 +15,33 @@ The program uses several external tools and databases:
 - TMHMM (v2.0c) [academic use only]
 - SMART database
 
-## Using Singularity (.sif) container
+## Using Singularity/Apptainer (.sif) containers
 
-A singularity container for the LRRprofiler program can be download directly in your workspace with:
-```
-singularity pull LRRprofiler.sif library://cgottin/default/lrr_profiler:0.2
-```
-or from the [Sylabs cloud](https://cloud.sylabs.io/library/_container/600ea381517f0358917abf0a) .
+LRRprofiler Singularity/Apptainer containers are available on the [GitHub Container Registry (GHCR)](https://github.com/JohGi?tab=packages). They can be downloaded directly using Apptainer or Singularity with the `oras://` protocol.
 
-The file LRRprofiler_v0.2_sing_3.6.def provide the corresponding singularity recipe.
+**Latest version (0.21):**
+
+```bash
+apptainer pull LRRprofiler_0.21.sif oras://ghcr.io/johgi/lrrprofiler:0.21
+```
 
 ### Usage
-The program can be run with the command line :
-```
-singularity run lrr_profiler0.1.sif --in_proteome <fastafile> --name <jobname> [--dev] [--nobuild]
+
+LRRprofiler can be run using Apptainer (or Singularity):
+
+```bash
+apptainer run LRRprofiler_0.21.sif \
+    --in_proteome <fastafile> \
+    --name <jobname> \
+    [--dev] [--nobuild]
 ```
 
-Using the example file :
-```
-singularity run lrr_profiler0.1.sif --in_proteome Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta --name ARATH
+For example, using the provided Arabidopsis thaliana proteome:
+
+```bash
+apptainer run LRRprofiler_0.21.sif \
+    --in_proteome /opt/LRRprofiler/example/Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta \
+    --name ARATH
 ```
 
 #### Pipeline options
@@ -43,7 +51,4 @@ singularity run lrr_profiler0.1.sif --in_proteome Arabidopsis_Thaliana_reviewed_
 
 --dev: (optional) If provided, the pipeline will retain the working directory containing temporary files.
 
---nobuild: (optional) If porvided, skip the profile refinement process and use exclusively profiles from the HMM_lib folder. This option can be useful to obtain homogeneous and reproductible annotation when comparing several proteomes.
-
-
-
+--nobuild: (optional) If provided, skip the profile refinement process and use exclusively profiles from the HMM_lib folder. This option can be useful to obtain homogeneous and reproductible annotation when comparing several proteomes.

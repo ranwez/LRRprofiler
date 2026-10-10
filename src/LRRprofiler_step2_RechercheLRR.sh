@@ -166,7 +166,7 @@ rm -f *search.csv
 # if NBARC --> after LRR end domain position, if kinase --> before kinase strat position
 
 gawk -F";" 'BEGIN{OFS=";"}{
-     if(NR==FNR){
+     if(FILENAME == ARGV[1]){
           gsub(" ",";");
           CLASS[$1]=$2;
           if($2~/Kinase/){
@@ -174,7 +174,7 @@ gawk -F";" 'BEGIN{OFS=";"}{
           else{
                lim2[$1]=$4}}
      else{
-          if($2!~/interLRR/){
+          if(FNR > 1 && $2!~/interLRR/){
                if($1!=prot){
                     if(CLASS[$1]!~/NB-ARC/ || (CLASS[$1]~/NB-ARC/ && $4>lim2[$1])){prot=$1;S[$1]=$(4)-1;E[$1]=$(5)+1};}
                else{

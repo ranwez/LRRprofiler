@@ -114,7 +114,15 @@ do
 done
 
 ## tmhmm and keep peptide signal
-cat LRR_${NAME}.fasta | ${LG_TMHMM} -noplot > TMHMM_out.txt
+"${LG_TMHMM}" -noplot "LRR_${NAME}.fasta" > TMHMM_out.txt
+
+input_count=$(gawk '/^>/{n++} END{print n+0}' "LRR_${NAME}.fasta")
+output_count=$(gawk '/^# .* Length:/{n++} END{print n+0}' TMHMM_out.txt)
+
+if (( output_count != input_count )); then
+    echo "ERROR: TMHMM processed $output_count/$input_count proteins." >&2
+    exit 1
+fi
 
 gawk 'BEGIN{OFS=";"}{if($3~/TMhelix/){if($4>30){print($1,"TM",$4,$5)}else{print($1,"PS",$4,$5)}}}' TMHMM_out.txt >> LRR_domains.tmp
 

@@ -224,6 +224,11 @@ if [[ -s "${NAME}_noLRR_regions.fasta" && -s "${NAME}_LRR_seq.fasta" ]]; then
                oldE=$12;
                evalue=$8;
                line=$0;}
+    }END{
+        if(line!=""){
+            gsub("\t",";",line);
+            print(line);
+        }
     }' Resblast.tmp > Resblast.txt
 
     #processed

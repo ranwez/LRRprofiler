@@ -73,8 +73,28 @@ ln -s $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt .
 
 cat $LRRPROFILER_TMP/Liste* > ${NAME}_PriorClassif.txt
 
+# Check that motif results are available.
+if [[ ! -s "LRR_${NAME}_ALLMOTIFS.csv" ]]; then
+    echo "ERROR: Missing or empty LRR motif results." >&2
+    exit 1
+fi
+
 ## a. Extract LRR sequences in fasta format
 gawk '{if(NR==FNR){split($0,T,";");P[">"T[1]]=1}else{if($1~/>/){if(P[$1]==1){p=1}else{p=0}};if(p==1){print}}}' LRR_${NAME}_ALLMOTIFS.csv $PROTEOME > LRR_${NAME}.fasta
+
+# Skip domain annotation if no LRR proteins were identified.
+if [[ ! -s "LRR_${NAME}.fasta" ]]; then
+    if [[ $(wc -l < "LRR_${NAME}_ALLMOTIFS.csv") -gt 1 ]]; then
+        echo "ERROR: LRR motifs were found, but no protein sequences could be extracted." >&2
+        exit 1
+    fi
+
+    echo "No LRR proteins identified. Skipping domain annotation."
+    mkdir -p "$OUT_DIR"
+    : > "$OUT_DIR/LRR_classification.csv"
+    : > "$OUT_DIR/LRR_domains_filtered.csv"
+    exit 0
+fi
 
 # prot size
 gawk 'BEGIN{OFS=";"}{if($1~/>/){if(length(prot)>0){print(prot,L)};gsub(">","");prot=$1;L=0}else{L=L+length($0)}}END{if(length(prot)>0){print(prot,L)}}' LRR_${NAME}.fasta > LRR_prot_size.csv

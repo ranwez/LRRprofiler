@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_step1_AmelioProfil.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o --in_proteins : Proteome subset (fasta)
 #             o --in_profile : Initial Profile Path
 #             o --out_profile_name : Final Profile name
@@ -95,7 +95,12 @@ echo "============================================="
 #--------------------------------------------------------------------
 # 1. Extract protein sample from protein List
 
-nbPf=$(grep -c ">" $Proteins)
+nbPf=$(gawk '/^>/{n++} END{print n+0}' "$Proteins")
+
+if (( nbPf == 0 )); then
+    echo "ERROR: No protein sequences provided for profile refinement." >&2
+    exit 1
+fi
 
 echo -e "\nFound $nbPf proteins in $Proteins file."
 
@@ -123,18 +128,17 @@ echo "profile\tnbProt\tnb_5%\tnb_1%\tnb_0.1%\tnb_motif\tmean_size\tsum_length" >
 
 
 for it in `seq 1 $itMax`
-do   
+do
     echo ""
     echo "iteration $it ..."
 
 
 # a) execute hmmsearch the output file contain comment lines starting with # that should be ignored
-    
-    hmmsearch -E 1000 --domE 1000 -o /dev/null --nobias --noali --domtblout HMMres${it}.tmp ${profile} $Proteins 
+
+    hmmsearch -E 1000 --domE 1000 -o /dev/null --nobias --noali --domtblout HMMres${it}.tmp ${profile} $Proteins
 
     nbProtOld=$nbProt
-    nbProt=$(grep -v "^#"  HMMres${it}.tmp | cut -f1 -d" "| sort -u | wc -l)
-
+    nbProt=$(gawk '$1 !~ /^#/ {P[$1]=1} END{print length(P)}' "HMMres${it}.tmp")
 
 
 # b) Profile Results : Profile; nbProteine from list found; threshold 0.5,0.1,0.01 ; nbMotifs; mean length of motifs
@@ -146,20 +150,25 @@ do
                       if($7<=0.05){nbProt5++};
                       if($7<=0.01){ nbProt1++};
                       if($7<=0.001){ nbProt01++;}
-                    }}END{print(prof,nbProt,nbProt5,nbProt1,nbProt01,nb,sizeLRR/nb,sizeLRR)}' HMMres${it}.tmp >> RES_construction_profile.txt
+                    }}END{print(prof,nbProt,nbProt5,nbProt1,nbProt01,nb,(nb > 0 ? sizeLRR/nb : 0),sizeLRR)}' HMMres${it}.tmp >> RES_construction_profile.txt
 
 
 
 
-# c) identify motifs with length consistant with the expected familly pattern length 
-    
-    gawk -v Psize=$size 'BEGIN{OFS=";"} 
-        $1!~/^#/{alignMatchLg=$(19)-$(18)+1;envMatchLg=$(21)-$(20)+1; 
+# c) identify motifs with length consistant with the expected familly pattern length
+
+    gawk -v Psize=$size 'BEGIN{OFS=";"}
+        $1!~/^#/{alignMatchLg=$(19)-$(18)+1;envMatchLg=$(21)-$(20)+1;
           if(alignMatchLg>(0.8*Psize) && envMatchLg<(1.1*Psize))
             {print($1,$10,$11,$18,$19,$20,$21)}}' HMMres${it}.tmp > motifs.tmp
-    
-    nbMotifsOld=$nbMotifs ;
-    nbMotifs=$(grep -c . motifs.tmp) ;
+
+    nbMotifsOld=$nbMotifs
+    nbMotifs=$(gawk 'END{print NR}' motifs.tmp)
+
+    if (( nbMotifs == 0 )); then
+        echo "No suitable LRR motifs found. Stopping profile refinement."
+        break
+    fi
 
  # d) do we have a better HMM or not ? If not continue a few more steps to avoid plateus then stop
 
@@ -190,11 +199,11 @@ do
 
 
 # f) Align sequence using MAFFT and build new profile
-    
+
     echo "Building new HMM ..."
     mafft --quiet motifsIt${it}.fasta > motifsIt${it}_align.fasta
 
-    hmmbuild -o /dev/null --amino Profile_${it}.hmm motifsIt${it}_align.fasta 
+    hmmbuild -o /dev/null --amino Profile_${it}.hmm motifsIt${it}_align.fasta
 
 
 # g) update variables, nettoyage fichiers temporaires
@@ -213,18 +222,26 @@ done
 ##we select the profile with the best results (max number of amino acids identified within repeats)
 best=$(gawk 'BEGIN{nb=0}{if($8>nb){nb=$8;profile=$1}}END{print(profile)}' RES_construction_profile.txt)
 
-echo "Retrieve $best as best profile"
+mkdir -p "$OUT_DIR"
+cp RES_construction_profile.txt "$OUT_DIR/${outname%.hmm}.log"
+echo "moving log file ${outname%.hmm}.log to $OUT_DIR/ "
 
-
-if [[ ! -e $OUT_DIR ]];then
-    mkdir -p $OUT_DIR ;
+# No refined profile was selected.
+if [[ -z "$best" || "$best" == "$(basename "$initProfile")" ]]; then
+    echo "No refined HMM profile selected. Using precomputed profiles."
+    cd "$MAIN"
+    exit 0
 fi
 
+if [[ ! -s "$best" ]]; then
+    echo "ERROR: Selected HMM profile $best is missing or empty." >&2
+    exit 1
+fi
 
-gawk -v name=${outname%.hmm} '{if(NR==2){$2=name};print}' $best > $OUT_DIR/${outname}
+echo "Retrieve $best as best profile"
+
+gawk -v name="${outname%.hmm}" '{if(NR==2){$2=name};print}' "$best" > "$OUT_DIR/$outname"
 echo "moving HMM file ${outname} to $OUT_DIR/ "
-cp RES_construction_profile.txt $OUT_DIR/${outname%.hmm}.log
-echo "moving log file ${outname%.hmm}.log to $OUT_DIR/ "
 
 cd $MAIN ;
 

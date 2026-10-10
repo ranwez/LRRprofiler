@@ -6,7 +6,7 @@ Created on Mon Apr 29 17:11:37 2019
 """
 
 #==================================================
-# This script concatenate all LRR motifs 
+# This script concatenate all LRR motifs
 #==================================================
 
 # Packages and Classes
@@ -36,7 +36,7 @@ args = parser.parse_args()
 #=====================================
 
 ## 1 . Importing data
-##--------------------   
+##--------------------
 
 ## a) Protein sequences fasta file
 fastaFile = args.sequences[0]
@@ -47,8 +47,8 @@ DATA=PDC.Proteome("Proteome")
 
 ## c) csv files
 myDir=args.directory[0]
-fileList=os.listdir(myDir)
-           
+fileList = sorted(os.listdir(myDir))
+
 
 ## File LRR
 for files in fileList :
@@ -76,7 +76,7 @@ for files in fileList :
 ##---------------------
 # For each protein, we sort motifs according to start position
 # then we delete element with same positions
-for prot in DATA.proteins :  
+for prot in DATA.proteins :
     DATA.proteins[prot].rm_duplicate()
     DATA.proteins[prot].order_motifs()
     DATA.proteins[prot].correct_pos()

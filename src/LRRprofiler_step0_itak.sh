@@ -4,10 +4,10 @@
 # SCRIPT : LRRprofiler_step0_itak.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o $1 : Proteome Path (fasta)
 #             o $2 : NAME
-# DEPENDENCIES : o iTAK v 1.7               
+# DEPENDENCIES : o iTAK v 1.7
 #========================================================
 
 

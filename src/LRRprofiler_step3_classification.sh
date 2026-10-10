@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_step3_classification.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o $1 : Proteome (fasta)
 #             o $2 : Name
 # DEPENDENCIES : o HMMER v 3.1b2
@@ -40,8 +40,8 @@ while (( $# > 0 )); do
     --in_proteome)
         PROTEOME=$(readlink -f "$2"); shift 2;
         if [[ ! -f $PROTEOME ]];then
-            echo "File $Proteome does not exist"
-            quit_pb_option	
+            echo "File $PROTEOME does not exist"
+            quit_pb_option
         fi
         ;;
     --name)
@@ -134,7 +134,7 @@ gawk -F";" 'BEGIN{OFS=";"}{if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}END{for(i i
 ## Classif RLK; NLR and f-box
 gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp
 
-## For putative RLP : 
+## For putative RLP :
 #   - pct = % of PS type motifs
 #   - pct2 = % of NLR type motifs
 
@@ -148,7 +148,7 @@ gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS
 
 gawk -F"[; ]" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/ || $2~/BLAST/){P[$1]++}}else{print($1,$2,P[$1])}}' LRR_domains_filtered.csv LRR_classification.tmp > LRR_classification.csv
 
-## f. structure 
+## f. structure
 cp $SCRIPT/LRR_structure.Rmd .
 #cp $SCRIPT/render.R .
 #R CMD BATCH '--args $(pwd)' render.R
@@ -182,11 +182,6 @@ fi
 #    cp LRR_structure.html $OUT_DIR/.
 #fi
 
-cd $MAIN 
+cd $MAIN
 
 echo "END STEP 3"
-
-
-
-
-

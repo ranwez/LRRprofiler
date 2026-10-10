@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_step2_RechercheLRR.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o --in_proteome : Proteome (fasta)
 #             o --name : Name
 #             o --rlk_profile : New Profile RLK
@@ -32,7 +32,7 @@ SCRIPT=${LG_SCRIPT}
 
 PROTEOME=""
 NAME="LRRprofiler"
-OUT_DIR="RES_step2_LRRsearch_$(date +'%Y%m%d_%H%M%S')" 
+OUT_DIR="RES_step2_LRRsearch_$(date +'%Y%m%d_%H%M%S')"
 LRR_RLK=""
 LRR_NLR=""
 
@@ -114,7 +114,7 @@ do
     else
         python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}_search.csv
     fi
-    
+
 done
 
 ## b. Concatenate all LRR motifs
@@ -122,27 +122,30 @@ python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_conc
 
 
 ## c. Look for LRR motifs in interMotifs regions
+gawk -F";" '$2 == "interLRR" && ($5 - $4 > 8) {
+    print ">" $1 ";" $4 ";" $5 "\n" $8
+}' "LRR_${NAME}_concat.tmp" > "LRR_${NAME}_interLRR.fasta"
 
-grep "interLRR" LRR_${NAME}_concat.tmp | gawk -F";" '($5-$4>8){print(">"$1";"$4";"$5"\n"$8)}' - > LRR_${NAME}_interLRR.fasta
+if [[ -s "LRR_${NAME}_interLRR.fasta" ]]; then
+  for profile in *.hmm
+  do
+      outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
+      hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
 
-for profile in *.hmm
-do
-    outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
-    hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
+      if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
+          rm ${outfile} #empty file
+      else
+          python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $WD/${outfile%.tbl}.csv
+      fi
 
-    if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
-        rm ${outfile} #enpty file
-    else
-        python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $WD/${outfile%.tbl}.csv
-    fi
-    
-done
+  done
+fi
 
 ## d. Concatenate all motifs
-python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv 
+python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv
 
 ##suppr csv to avoid redumdancies with next step
-rm *search.csv
+rm -f *search.csv
 
 ## B . SEARCH FOR LRR MOTIFS WITH BLAST
 ##---------------------------------------
@@ -218,9 +221,6 @@ mkdir $OUT_DIR
 cp LRR_${NAME}_ALLMOTIFS.csv $OUT_DIR/.
 cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 
-cd $MAIN 
+cd $MAIN
 
 echo "END STEP 2"
-
-
-

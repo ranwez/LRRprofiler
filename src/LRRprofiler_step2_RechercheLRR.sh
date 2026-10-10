@@ -167,7 +167,9 @@ gawk -F";" 'BEGIN{OFS=";"}{
                     if(CLASS[$1]!~/NB-ARC/ || (CLASS[$1]~/NB-ARC/ && $4>lim2[$1])){prot=$1;S[$1]=$(4)-1;E[$1]=$(5)+1};}
                else{
                     if(CLASS[$1]!~/Kinase/ || (CLASS[$1]~/Kinase/ && $5<lim1[$1])){E[$1]=$(5)+1}}}}
-}END{for(i in S){
+}END{
+  PROCINFO["sorted_in"] = "@ind_str_asc"
+  for(i in S){
      if(lim1[i]!=""){
           print(i,1,S[i]);print(i,E[i],lim1[i]-1)}
      else{

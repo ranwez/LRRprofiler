@@ -128,8 +128,24 @@ rm *.tmp
 ## e. Protein classification (NLR, RLK, RLP, F-box and other)
 
 ## Functionnal Domain list per proteins
-gawk -F";" 'BEGIN{OFS=";"}{if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}END{for(i in P){print(i,P[i])}}' LRR_domains_filtered.csv > tmp
-#gawk -F";" 'BEGIN{OFS=";"}{if($2!~/LRR/){if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}}END{for(i in P){print(i,P[i])}}' LRR_domains_filtered.csv > tmp
+gawk -F";" '
+    BEGIN {
+        OFS = ";"
+    }
+    {
+        if (P[$1]) {
+            P[$1] = P[$1] "-" $2
+        } else {
+            P[$1] = $2
+        }
+    }
+    END {
+        PROCINFO["sorted_in"] = "@ind_str_asc"
+        for (i in P) {
+            print i, P[i]
+        }
+    }
+' LRR_domains_filtered.csv > tmp
 
 ## Classif RLK; NLR and f-box
 gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp

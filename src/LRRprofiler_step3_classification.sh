@@ -176,6 +176,7 @@ gawk -F";" '
 ' LRR_domains_filtered.csv > tmp
 
 ## Classif RLK; NLR and f-box
+: > putativeRLP.tmp
 gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp
 
 ## For putative RLP :

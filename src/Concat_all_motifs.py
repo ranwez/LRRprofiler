@@ -55,7 +55,7 @@ for files in fileList :
     if(re.search(".csv",files)!=None):
         #csvFile="%s/%s"%(myDir,files)
         #csv_file=open(csvFile, mode='r')
-        csv_file=open(files, mode='r')
+        csv_file = open(os.path.join(myDir, files), mode="r")
         csv_reader = csv.reader(csv_file, delimiter=';')
         line_count = 0
         for row in csv_reader:

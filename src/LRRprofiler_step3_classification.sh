@@ -221,11 +221,13 @@ else
     cp LRR_domains_filtered.csv $OUT_DIR/.
 fi
 
-#if [[ ! -e LRR_structure.html ]];then
-#    echo "File LRR_structure.html was not created. This could be due to memory error."
-#else
-#    cp LRR_structure.html $OUT_DIR/.
-#fi
+html_report="LRR_structure_${NAME}.html"
+
+if [[ -s "$html_report" ]]; then
+    cp "$html_report" "$OUT_DIR/"
+else
+    echo "WARNING: HTML report was not generated." >&2
+fi
 
 cd $MAIN
 

@@ -120,6 +120,18 @@ done
 ## b. Concatenate all LRR motifs
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_concat.tmp
 
+# Skip further searches if no LRR motifs were identified.
+if [[ $(wc -l < "LRR_${NAME}_concat.tmp") -eq 1 ]]; then
+    echo "No LRR motifs identified. Skipping inter-LRR searches and BLAST."
+
+    mkdir -p "$OUT_DIR"
+    cp "LRR_${NAME}_concat.tmp" "$OUT_DIR/LRR_${NAME}_ALLMOTIFS.csv"
+    cp "${NAME}_PriorClassif.txt" "$OUT_DIR/"
+
+    cd "$MAIN"
+    echo "END STEP 2"
+    exit 0
+fi
 
 ## c. Look for LRR motifs in interMotifs regions
 gawk -F";" '$2 == "interLRR" && ($5 - $4 > 8) {

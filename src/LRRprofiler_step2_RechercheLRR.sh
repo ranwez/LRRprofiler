@@ -17,6 +17,8 @@
 #========================================================
 #                Environment & variables
 #========================================================
+set -euo pipefail
+
 
 function quit_pb_option() {
     printf "\nOptions : --in_proteome ; --name ; --rlk_profile ; --nlr_profile ; --out_dir ; --dev\n"

@@ -15,7 +15,7 @@
 #========================================================
 #                Environment & variables
 #========================================================
-
+set -euo pipefail
 
 # variables
 function quit_pb_option() {

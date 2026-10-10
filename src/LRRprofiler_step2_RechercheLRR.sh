@@ -194,38 +194,44 @@ gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/>/){if(prot!=""){print(prot,seq);prot
 
 # Create fasta for blast database
 cat LRR_${NAME}_interLRR.fasta extraLRR_regions.fasta > ${NAME}_noLRR_regions.fasta
-#gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/interLRR/ && $5-$4>=8){print(">"$1,$4,$5);print($8)}}else{if($3-$2>=8){print(">"$1,$2,$3);print($4)}}}' LRR_${NAME}_ALLMOTIFS_init.csv extraLRR_regions.txt > ${NAME}_noLRR_regions.fasta
 
-makeblastdb -in ${NAME}_noLRR_regions.fasta -dbtype prot -parse_seqids
-
-# Select LRR motifs with eval<5 for Query file
+# Select LRR motifs with eval<5 for query file
 gawk -F";" 'BEGIN{OFS=";"}NR>1{if($2!~/interLRR/ && $7<=5 && $6>=20 && $6<=26){print(">"$1,$4,$5);print($8)}}' LRR_${NAME}_ALLMOTIFS_init.csv > ${NAME}_LRR_seq.fasta
 
-time blastp -db ${NAME}_noLRR_regions.fasta -query ${NAME}_LRR_seq.fasta -max_hsps 2 -evalue 1.0 -out testblast.out -outfmt "6 qseqid sseqid length nident positive gaps bitscore evalue qstart qend sstart send qlen sseq"
+# Run BLAST only if both input FASTA files contain sequences.
+if [[ -s "${NAME}_noLRR_regions.fasta" && -s "${NAME}_LRR_seq.fasta" ]]; then
 
-#filtering results
-sort -k2,2 -Vk11,11 testblast.out | gawk 'BEGIN{OFS="\t"}{if($3>7 && $5/$3>0.6){print($0)}}' - > Resblast.tmp
+    makeblastdb -in ${NAME}_noLRR_regions.fasta -dbtype prot -parse_seqids
 
-#overlopping of more than 80%, we keep the hit with best eval
-gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
-      if($2==current && ((oldE-$11+1)/($12-$11))>0.8){
-           if($8<evalue){
-                line=$0;
-                oldS=$11;
-                oldE=$12;
-                evalue=$8;}}
-      else{
-           gsub("\t",";",line);
-           if(line!=""){print(line)};
-           current=$2;
-           oldS=$11;
-           oldE=$12;
-           evalue=$8;
-           line=$0;}
-}' Resblast.tmp > Resblast.txt
+    time blastp -db ${NAME}_noLRR_regions.fasta -query ${NAME}_LRR_seq.fasta -max_hsps 2 -evalue 1.0 -out testblast.out -outfmt "6 qseqid sseqid length nident positive gaps bitscore evalue qstart qend sstart send qlen sseq"
 
-#processed
-python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+    #filtering results
+    sort -k2,2 -Vk11,11 testblast.out | gawk 'BEGIN{OFS="\t"}{if($3>7 && $5/$3>0.6){print($0)}}' - > Resblast.tmp
+
+    #overlopping of more than 80%, we keep the hit with best eval
+    gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
+          if($2==current && ((oldE-$11+1)/($12-$11))>0.8){
+               if($8<evalue){
+                    line=$0;
+                    oldS=$11;
+                    oldE=$12;
+                    evalue=$8;}}
+          else{
+               gsub("\t",";",line);
+               if(line!=""){print(line)};
+               current=$2;
+               oldS=$11;
+               oldE=$12;
+               evalue=$8;
+               line=$0;}
+    }' Resblast.tmp > Resblast.txt
+
+    #processed
+    python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+
+else
+    echo "No BLAST queries or searchable regions. Skipping BLAST."
+fi
 
 #concatenate
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS.csv

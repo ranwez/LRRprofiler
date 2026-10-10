@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_global.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o --in_proteome : Path of proteome file in fasta format
 #             o --name : project name for outputfile identification
 #             o --dev : if given, run in dev mode (conserve all temporary files for debug)
@@ -92,7 +92,7 @@ SCRIPT=${LG_SCRIPT}
 
 LRRPROFILER_TMP=$MAIN/tmp_LRRprofiler_$(date +'%Y%m%d_%H%M%S')
 export LRRPROFILER_TMP
-mkdir $LRRPROFILER_TMP 
+mkdir $LRRPROFILER_TMP
 
 LRRPROFILER_RESDIR=$MAIN/Res_$NAME
 export LRRPROFILER_RESDIR
@@ -127,17 +127,19 @@ echo "  STEP 1 : refining profiles"
 echo -e "----------------------------\n"
 
 ## list Kinase and NB-ARC file
-gawk '{print($1,$3,$4)}' $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"Kinase",start,end)}' > $LRRPROFILER_TMP/ListeKinase.txt
+gawk '{print($1,$3,$4)}' $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{if(prot!=""){print(prot,"Kinase",start,end)}}' > $LRRPROFILER_TMP/ListeKinase.txt
 
 hmmsearch -o /dev/null -Z 35000 --nobias --noali --domtblout $LRRPROFILER_TMP/NBARC.tbl ${LG_HMMlib}/NB-ARC.hmm $PROTEOME
-gawk '$1!~/#/{print($1,$18,$19)}' $LRRPROFILER_TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NB-ARC",start,end)};prot=$1;start=$2;end=$3}}END{print(prot,"NB-ARC",start,end)}' > $LRRPROFILER_TMP/ListeNBARC.txt
+gawk '$1!~/#/{print($1,$18,$19)}' $LRRPROFILER_TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NB-ARC",start,end)};prot=$1;start=$2;end=$3}}END{if(prot!=""){print(prot,"NB-ARC",start,end)}}' > $LRRPROFILER_TMP/ListeNBARC.txt
 
 
 if [[ $nobuild -eq 1 ]];then
     echo -e "nobuild option; skipping step 1\n"
 else
     # A. LRR-RLK
-    if [[ ! -e $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm ]]; then
+    if [[ ! -s "$LRRPROFILER_TMP/ListeKinase.txt" ]]; then
+        echo "No kinase candidates; skipping LRR-RLK profile refinement"
+    elif [[ ! -e "$LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm" ]]; then
         echo -e "Running step 1 for LRR-RLK motifs"
         gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeKinase.txt $PROTEOME > $LRRPROFILER_TMP/subproteome_kinase.fasta
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteins $LRRPROFILER_TMP/subproteome_kinase.fasta --in_profile $LG_HMMlib/SMART_LRR.hmm --out_profile_name LRR_kinase_${NAME}.hmm
@@ -148,7 +150,9 @@ else
     fi
 
     # B. NLR
-    if [[ ! -e $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_${NAME}.hmm ]]; then
+    if [[ ! -s "$LRRPROFILER_TMP/ListeNBARC.txt" ]]; then
+        echo "No NB-ARC candidates; skipping LRR-NLR profile refinement"
+    elif [[ ! -e "$LRRPROFILER_RESDIR/Res_step1/LRR_NLR_${NAME}.hmm" ]]; then
         echo -e "Running step 1 for LRR-NLR motifs"
         gawk '{if(NR==FNR){P[">"$1]=1}else{if($1~/>/){if(P[$1]==1){pr=1}else{pr=0}};if(pr==1){print}}}' $LRRPROFILER_TMP/ListeNBARC.txt $PROTEOME > $LRRPROFILER_TMP/subproteome_NBARC.fasta
         $SCRIPT/LRRprofiler_step1_AmelioProfil.sh --in_proteins $LRRPROFILER_TMP/subproteome_NBARC.fasta --in_profile ${LG_HMMlib}/SMART_LRR.hmm --out_profile_name LRR_NLR_$NAME.hmm
@@ -167,12 +171,23 @@ echo "  STEP 2 : Search for LRR motifs"
 echo -e "--------------------------------\n"
 
 
-if [[ ! -e $LRRPROFILER_RESDIR/Res_step2 ]];then
-    if [[ $nobuild -eq 1 ]];then
-        $SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME
-	else
-		$SCRIPT/LRRprofiler_step2_RechercheLRR.sh --in_proteome $PROTEOME --name $NAME --rlk_profile $LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm --nlr_profile $LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm
-	fi
+if [[ ! -e "$LRRPROFILER_RESDIR/Res_step2" ]]; then
+    step2_args=(--in_proteome "$PROTEOME" --name "$NAME")
+
+    if [[ $nobuild -eq 0 ]]; then
+        rlk_profile="$LRRPROFILER_RESDIR/Res_step1/LRR_kinase_$NAME.hmm"
+        nlr_profile="$LRRPROFILER_RESDIR/Res_step1/LRR_NLR_$NAME.hmm"
+
+        if [[ -s "$LRRPROFILER_TMP/ListeKinase.txt" && -f "$rlk_profile" ]]; then
+            step2_args+=(--rlk_profile "$rlk_profile")
+        fi
+
+        if [[ -s "$LRRPROFILER_TMP/ListeNBARC.txt" && -f "$nlr_profile" ]]; then
+            step2_args+=(--nlr_profile "$nlr_profile")
+        fi
+    fi
+
+    "$SCRIPT/LRRprofiler_step2_RechercheLRR.sh" "${step2_args[@]}"
 else
     echo -e "Found results for step 2; skipping step 2\n"
 fi
@@ -197,8 +212,3 @@ fi
 #========================================================
 #                      END
 #========================================================
-
-
-
-
-

@@ -1,21 +1,18 @@
 [workspace]
 authors = ["Johanna Girodolle"]
-name = "lrrprofiler-container"
+name = "lrrprofiler"
 channels = ["conda-forge", "bioconda"]
-platforms = ["linux-64"]
-version = "0.1.0"
+platforms = [{ platform = "linux-64", glibc = "2.27", linux = "4.15" }]
+version = "0.22.0"
 
 [dependencies]
-python = "3.11.*"
-biopython = ">=1.81,<1.85"
-perl = "*"
-perl-bioperl = "*"
-hmmer = "*"
-mafft = "*"
-blast = "*"
-gawk = "*"
-r-base = "4.4.*"
-r-rmarkdown = "*"
-r-ggplot2 = "*"
-r-reshape2 = "*"
-pandoc = "*"
+python = "==3.6.5"
+biopython = "==1.70"
+hmmer = "==3.1b2"
+mafft = "==7.310"
+blast = "==2.6.0"
+
+# Historical system tools are pinned in the Apptainer definition:
+# Perl 5.26.1, BioPerl 1.7.2, GNU Awk 4.1.4, R 3.4.4,
+# Pandoc 1.19.2.4, rmarkdown 2.9, ggplot2 3.3.5, reshape2 1.4.4.
+# iTAK 2019-02-08 and LRRprofiler code are pinned by Git commit.

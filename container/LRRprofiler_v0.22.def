@@ -1,0 +1,163 @@
+Bootstrap: docker
+From: ubuntu:18.04
+
+%labels
+    Maintainer "Johanna Girodolle"
+    Authors "Celine Gottin, Vincent Ranwez"
+    Version "0.22"
+    Description "LRRprofiler: identification and annotation of plant leucine-rich repeat receptors"
+    LRRprofilerCommit 267244717b9ba12a6eba0a641366ec7f844631fc
+    iTAKCommit ae4de0fc95853ac5326e82706d3b33946f4b714d
+    RPackageSnapshot 2021-07-01
+    TMHMMVersion 2.0c
+
+%files
+    pixi.toml /opt/pixi/pixi.toml
+    pixi.lock /opt/pixi/pixi.lock
+    tmhmm2.0c-linux.tar /opt/tmhmm2.0c-linux.tar
+
+%post
+    set -eu
+    export DEBIAN_FRONTEND=noninteractive
+
+    # Install historical binary packages from the Ubuntu 18.04 repositories.
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        bash ca-certificates curl git file build-essential pkg-config \
+        libcurl4-openssl-dev libssl-dev libxml2-dev libicu-dev \
+        libfontconfig1-dev libfreetype6-dev libpng-dev libjpeg-dev \
+        zlib1g-dev \
+        perl \
+        libbio-perl-perl=1.7.2-2 \
+        gawk='1:4.1.4+dfsg-1build1' \
+        r-base=3.4.4-1ubuntu1 \
+        r-base-core=3.4.4-1ubuntu1 \
+        r-base-dev=3.4.4-1ubuntu1 \
+        r-recommended=3.4.4-1ubuntu1 \
+        pandoc='1.19.2.4~dfsg-1build4' \
+        pandoc-data='1.19.2.4~dfsg-1build4'
+    rm -rf /var/lib/apt/lists/*
+
+    # Install R packages in a persistent, system-wide library, not a user home.
+    # R_LIBS_SITE must also be defined in %environment for runtime discovery.
+    install -d -m 755 /opt/R/site-library
+    export R_LIBS_SITE=/opt/R/site-library
+    export R_LIBS=/opt/R/site-library
+    # Read R code from stdin; R 3.4.4 does not reliably handle multiline -e.
+    Rscript --vanilla - <<'RSCRIPT_INSTALL'
+options(repos = c(CRAN = "https://packagemanager.posit.co/cran/2021-07-01"))
+packages <- c("rmarkdown", "ggplot2", "reshape2")
+library_path <- Sys.getenv("R_LIBS_SITE")
+stopifnot(library_path %in% .libPaths())
+install.packages(
+    packages,
+    lib = library_path,
+    dependencies = c("Depends", "Imports", "LinkingTo"),
+    Ncpus = 2
+)
+expected <- c(rmarkdown = "2.9", ggplot2 = "3.3.5", reshape2 = "1.4.4")
+actual <- vapply(
+    names(expected),
+    function(pkg) as.character(packageVersion(pkg, lib.loc = library_path)),
+    character(1)
+)
+stopifnot(identical(unname(actual), unname(expected)))
+stopifnot(all(vapply(packages, requireNamespace, logical(1), quietly = TRUE)))
+RSCRIPT_INSTALL
+    chmod -R a+rX /opt/R/site-library
+
+    # Install the locked Python, HMMER, MAFFT and BLAST environment.
+    curl -fsSL https://pixi.sh/install.sh -o /tmp/install-pixi.sh
+    PIXI_VERSION=0.81.0 PIXI_NO_PATH_UPDATE=1 sh /tmp/install-pixi.sh
+    rm /tmp/install-pixi.sh
+    export PATH="/root/.pixi/bin:/opt/pixi/.pixi/envs/default/bin:$PATH"
+    cd /opt/pixi
+    pixi install --locked
+
+    # Use Ubuntu Perl 5.26.1 with the system BioPerl installation.
+    # Avoid accidentally using a transitive Perl dependency from Pixi.
+    ln -sf /usr/bin/perl /usr/local/bin/perl
+    export PATH="/usr/local/bin:$PATH"
+    perl -MBio::SeqIO -e 1
+
+    # Retrieve pinned LRRprofiler master and historical iTAK source revisions.
+    git clone https://github.com/ranwez/LRRprofiler.git /opt/LRRprofiler
+    git -C /opt/LRRprofiler checkout --detach 267244717b9ba12a6eba0a641366ec7f844631fc
+    git clone https://github.com/kentnf/iTAK.git /opt/iTAK
+    git -C /opt/iTAK checkout --detach ae4de0fc95853ac5326e82706d3b33946f4b714d
+    test "$(git hash-object /opt/iTAK/iTAK.pl)" = f8070b1cb162a452863a598503625599ce5a8e08
+    chmod +x /opt/LRRprofiler/src/*.sh
+    chmod +x /opt/iTAK/bin/hmmscan /opt/iTAK/bin/hmmpress
+
+    # Generate the required HMMER indexes before sealing the SIF.
+    mkdir -p /opt/itak-test
+    cp /opt/iTAK/test_seq /opt/itak-test/test_seq
+    cd /opt/itak-test
+    perl /opt/iTAK/iTAK.pl -p 1 test_seq
+    test -s test_seq_output/shiu_alignment.txt
+    cd /
+    rm -rf /opt/itak-test /opt/LRRprofiler/.git /opt/iTAK/.git
+
+    # TMHMM 2.0c is distributed under a separate licence.
+    # Supply an archive containing the working x86-64 Linux decoder.
+    tar -xf /opt/tmhmm2.0c-linux.tar -C /
+    rm /opt/tmhmm2.0c-linux.tar
+    test -s /tmhmm2.0c/bin/tmhmm
+    test -s /tmhmm2.0c/bin/decodeanhmm.Linux_x86_64
+    file -Lb /tmhmm2.0c/bin/decodeanhmm.Linux_x86_64 | grep -q "ELF 64-bit LSB.*x86-64"
+    chmod +x /tmhmm2.0c/bin/tmhmm /tmhmm2.0c/bin/decodeanhmm.Linux_x86_64
+
+%environment
+    export PATH="/usr/local/bin:/opt/pixi/.pixi/envs/default/bin:$PATH"
+    export R_LIBS_SITE="/opt/R/site-library"
+    export R_LIBS="/opt/R/site-library"
+    export LC_ALL=C
+    export LG_SCRIPT="/opt/LRRprofiler/src"
+    export LG_HMMlib="/opt/LRRprofiler/HMM_lib"
+    export LG_MAFFT="mafft"
+    export LG_ITAK="/opt/iTAK/iTAK.pl"
+    export LG_TMHMM="/tmhmm2.0c/bin/tmhmm"
+
+%runscript
+    exec bash /opt/LRRprofiler/src/LRRprofiler_global.sh "$@"
+
+%test
+    set -eu
+    export PATH="/usr/local/bin:/opt/pixi/.pixi/envs/default/bin:$PATH"
+    export R_LIBS_SITE="/opt/R/site-library"
+    export R_LIBS="/opt/R/site-library"
+
+    for exe in python3 perl gawk hmmsearch hmmbuild mafft blastp makeblastdb Rscript pandoc; do
+        command -v "$exe" > /dev/null
+    done
+
+    python3 -c 'import sys, Bio; assert sys.version_info[:3] == (3, 6, 5); assert Bio.__version__ == "1.70"'
+    perl -MBio::SeqIO -e 1
+    perl -e 'die "Unexpected Perl version\n" unless $^V eq v5.26.1'
+    perl -MBio::Root::Version -e 'die "Unexpected BioPerl version\n" unless $Bio::Root::Version::VERSION eq "1.007002"'
+    hmmbuild -h | grep -q 'HMMER 3.1b2'
+    mafft --version 2>&1 | grep -q 'v7.310'
+    blastp -version | grep -q '2.6.0+'
+    gawk --version | head -n 1 | grep -q '4.1.4'
+    Rscript --vanilla - <<'RSCRIPT_TEST'
+stopifnot(as.character(getRversion()) == "3.4.4")
+library_path <- Sys.getenv("R_LIBS_SITE")
+stopifnot(library_path %in% .libPaths())
+expected <- c(rmarkdown = "2.9", ggplot2 = "3.3.5", reshape2 = "1.4.4")
+for (pkg in names(expected)) {
+    stopifnot(as.character(packageVersion(pkg, lib.loc = library_path)) == expected[[pkg]])
+    stopifnot(requireNamespace(pkg, quietly = TRUE))
+}
+RSCRIPT_TEST
+    pandoc --version | head -n 1 | grep -q '1.19.2.4'
+    test -s /opt/iTAK/database/Plant_Pkinase_fam.hmm.h3i
+    test -s /opt/LRRprofiler/HMM_lib/SMART_LRR.hmm
+
+    # Run this functional test on native HPC Linux, not WSL.
+    # The TMHMM wrapper can return success without producing predictions.
+    tmhmm_output=$(
+        printf '>TM_TEST\nMEILCEDNTSLSSIPNSLMQVDGDSGLYRNDFNSRDANSSDASNWTIDGENRTNLSFEGYLPPTCLSILHL\nQEKNWSALLTAVVIILTIAGNILVIMAVSLEKKLQNATNYFLMSLAIADMLLGFLVMPVSMLTILYGYRWP\n' |
+            /tmhmm2.0c/bin/tmhmm -noplot -d
+    )
+    printf '%s\n' "$tmhmm_output" |
+        gawk '$1 == "TM_TEST" && $3 == "TMhelix" {n++} END {exit (n != 2)}'

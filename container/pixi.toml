@@ -3,7 +3,7 @@ authors = ["Johanna Girodolle"]
 name = "lrrprofiler"
 channels = ["conda-forge", "bioconda"]
 platforms = [{ platform = "linux-64", glibc = "2.27", linux = "4.15" }]
-version = "0.22.0"
+version = "0.24.0"
 
 [dependencies]
 python = "==3.6.5"

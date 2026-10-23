@@ -19,10 +19,10 @@ The program uses several external tools and databases:
 
 LRRprofiler Singularity/Apptainer containers are available on the [GitHub Container Registry (GHCR)](https://github.com/JohGi?tab=packages). They can be downloaded directly using Apptainer or Singularity with the `oras://` protocol.
 
-**Latest version (0.22):**
+**Latest version (0.24):**
 
 ```bash
-apptainer pull LRRprofiler_0.22.sif oras://ghcr.io/johgi/lrrprofiler:0.22
+apptainer pull LRRprofiler_0.24.sif oras://ghcr.io/johgi/lrrprofiler:0.24
 ```
 
 ### Usage
@@ -30,7 +30,7 @@ apptainer pull LRRprofiler_0.22.sif oras://ghcr.io/johgi/lrrprofiler:0.22
 LRRprofiler can be run using Apptainer (or Singularity):
 
 ```bash
-apptainer run LRRprofiler_0.22.sif \
+apptainer run LRRprofiler_0.24.sif \
     --in_proteome <fastafile> \
     --name <jobname> \
     [--dev] [--nobuild]
@@ -39,7 +39,7 @@ apptainer run LRRprofiler_0.22.sif \
 For example, using the provided Arabidopsis thaliana proteome:
 
 ```bash
-apptainer run LRRprofiler_0.22.sif \
+apptainer run LRRprofiler_0.24.sif \
     --in_proteome /opt/LRRprofiler/example/Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta \
     --name ARATH
 ```

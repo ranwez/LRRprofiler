@@ -4,9 +4,9 @@ From: ubuntu:18.04
 %labels
     Maintainer "Johanna Girodolle"
     Authors "Celine Gottin, Vincent Ranwez"
-    Version "0.22"
+    Version "0.24"
     Description "LRRprofiler: identification and annotation of plant leucine-rich repeat receptors"
-    LRRprofilerCommit 267244717b9ba12a6eba0a641366ec7f844631fc
+    LRRprofilerCommit b565452862094a87698af43c72e0a7576707c4bd
     iTAKCommit ae4de0fc95853ac5326e82706d3b33946f4b714d
     RPackageSnapshot 2021-07-01
     TMHMMVersion 2.0c
@@ -80,9 +80,9 @@ RSCRIPT_INSTALL
     export PATH="/usr/local/bin:$PATH"
     perl -MBio::SeqIO -e 1
 
-    # Retrieve pinned LRRprofiler master and historical iTAK source revisions.
+    # Retrieve immutable LRRprofiler and historical iTAK source revisions.
     git clone https://github.com/ranwez/LRRprofiler.git /opt/LRRprofiler
-    git -C /opt/LRRprofiler checkout --detach 267244717b9ba12a6eba0a641366ec7f844631fc
+    git -C /opt/LRRprofiler checkout --detach b565452862094a87698af43c72e0a7576707c4bd
     git clone https://github.com/kentnf/iTAK.git /opt/iTAK
     git -C /opt/iTAK checkout --detach ae4de0fc95853ac5326e82706d3b33946f4b714d
     test "$(git hash-object /opt/iTAK/iTAK.pl)" = f8070b1cb162a452863a598503625599ce5a8e08

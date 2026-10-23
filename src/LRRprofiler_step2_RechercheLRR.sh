@@ -192,7 +192,7 @@ gawk -F";" 'BEGIN{OFS=";"}{
           else{print(i,1,S[i]);print(i,E[i],"end")}}}
 }' ${NAME}_PriorClassif.txt LRR_${NAME}_ALLMOTIFS_init.csv > extraLRR_dom.tmp
 
-gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/>/){if(prot!=""){print(prot,seq);prot="";seq=""};gsub(">","");prot=$1}else{gsub(/\*/, "");seq=seq""$1}}END{print(prot,seq)}' $PROTEOME | gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{if($3=="end"){end=length(SEQ[$1]);string=substr(SEQ[$1],$2);}else{string=substr(SEQ[$1],$2,$3-$2+1);end=$3};if(end-$2>10){print(">"$1";"$2";"end"\n"string)}}}' - extraLRR_dom.tmp > extraLRR_regions.fasta
+gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/^>/){if(prot!=""){sub(/\*$/, "", seq);print(prot,seq)};sub(/^>/, "", $1);prot=$1;seq=""}else{seq=seq""$1}}END{if(prot!=""){sub(/\*$/, "", seq);print(prot,seq)}}' "$PROTEOME" | gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{if($3=="end"){end=length(SEQ[$1]);string=substr(SEQ[$1],$2);}else{string=substr(SEQ[$1],$2,$3-$2+1);end=$3};if(end-$2>10){print(">"$1";"$2";"end"\n"string)}}}' - extraLRR_dom.tmp > extraLRR_regions.fasta
 
 # Create fasta for blast database
 cat LRR_${NAME}_interLRR.fasta extraLRR_regions.fasta > ${NAME}_noLRR_regions.fasta

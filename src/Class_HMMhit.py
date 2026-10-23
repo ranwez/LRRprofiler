@@ -19,6 +19,7 @@ class hmmHit() :
         self.seq=""
         self.profile="" ## profile name
         self.profile_len=""
+        self.query_len=[]
         self.score=[]
         self.eval=[]
         self.startHsps=[]
@@ -55,7 +56,7 @@ class hmmHit() :
         self.limitInf.append(int(liste[4]))
         self.seq=sequence
         self.profile="BLAST"
-        self.profile_len=int(liste[16])
+        self.query_len.append(int(liste[16]))
         self.score.append(float(liste[10]))
         self.eval.append(float(liste[11]))
         self.startHsps.append(int(liste[4])+int(liste[14])-1)
@@ -246,10 +247,10 @@ class hmmHit() :
                 self.startHsps[i]=self.startHsps[i]-(self.startQuery[i]-1)
 
             ## extend c-ter
-            if(self.endHsps[i]+(self.profile_len-self.endQuery[i])>self.limitSup[i]):
+            if(self.endHsps[i]+(self.query_len[i]-self.endQuery[i])>self.limitSup[i]):
                 self.endHsps[i]=self.limitSup[i]
             else:
-                self.endHsps[i]=self.endHsps[i]+(self.profile_len-self.endQuery[i])
+                self.endHsps[i]=self.endHsps[i]+(self.query_len[i]-self.endQuery[i])
 
 
 #_________________

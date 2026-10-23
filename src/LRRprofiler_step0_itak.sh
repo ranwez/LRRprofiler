@@ -40,7 +40,15 @@ if [[ ! -e $RESDIR ]];then
     mkdir -p $RESDIR
 fi
 
-cp ${PROTEOME}_output/shiu_alignment.txt $RESDIR/${NAME}_shiu_alignment.txt
+ITAK_KINASE_FILE="${PROTEOME}_output/shiu_alignment.txt"
+OUTPUT_KINASE_FILE="$RESDIR/${NAME}_shiu_alignment.txt"
+
+if [[ -e "$ITAK_KINASE_FILE" ]]; then
+    cp "$ITAK_KINASE_FILE" "$OUTPUT_KINASE_FILE"
+else
+    echo "No protein kinase identified by iTAK."
+    : > "$OUTPUT_KINASE_FILE"
+fi
 
 # Cleaning
 cd $MAIN ; rm -r $WD

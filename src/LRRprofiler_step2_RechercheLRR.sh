@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_step2_RechercheLRR.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o --in_proteome : Proteome (fasta)
 #             o --name : Name
 #             o --rlk_profile : New Profile RLK
@@ -17,6 +17,8 @@
 #========================================================
 #                Environment & variables
 #========================================================
+set -euo pipefail
+
 
 function quit_pb_option() {
     printf "\nOptions : --in_proteome ; --name ; --rlk_profile ; --nlr_profile ; --out_dir ; --dev\n"
@@ -32,7 +34,7 @@ SCRIPT=${LG_SCRIPT}
 
 PROTEOME=""
 NAME="LRRprofiler"
-OUT_DIR="RES_step2_LRRsearch_$(date +'%Y%m%d_%H%M%S')" 
+OUT_DIR="RES_step2_LRRsearch_$(date +'%Y%m%d_%H%M%S')"
 LRR_RLK=""
 LRR_NLR=""
 
@@ -90,10 +92,10 @@ ln -s ${LG_HMMlib}/SMART_LRR_*.hmm .
 ln -s ${LG_HMMlib}/LRR_NLR_ORYSJ_canonic_refined.hmm .
 ln -s ${LG_HMMlib}/LRR_NLR_ARATH.hmm .
 
-for hmm in ${LRR_RLK} ${LRR_NLR}
-do
-    if [[ -f ${hmm} ]];then
-        ln -s ${hmm} .
+for hmm in "$LRR_RLK" "$LRR_NLR"; do
+    if [[ -f "$hmm" ]]; then
+        filename=$(basename "$hmm")
+        ln -s "$hmm" "${filename%.hmm}_run_refined.hmm"
     fi
 done
 
@@ -114,35 +116,50 @@ do
     else
         python3 $SCRIPT/Extract_LRR_motifs.py -s $PROTEOME -t ${outfile} -o ${outfile%.tbl}_search.csv
     fi
-    
+
 done
 
 ## b. Concatenate all LRR motifs
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_concat.tmp
 
+# Skip further searches if no LRR motifs were identified.
+if [[ $(wc -l < "LRR_${NAME}_concat.tmp") -eq 1 ]]; then
+    echo "No LRR motifs identified. Skipping inter-LRR searches and BLAST."
+
+    mkdir -p "$OUT_DIR"
+    cp "LRR_${NAME}_concat.tmp" "$OUT_DIR/LRR_${NAME}_ALLMOTIFS.csv"
+    cp "${NAME}_PriorClassif.txt" "$OUT_DIR/"
+
+    cd "$MAIN"
+    echo "END STEP 2"
+    exit 0
+fi
 
 ## c. Look for LRR motifs in interMotifs regions
+gawk -F";" '$2 == "interLRR" && ($5 - $4 > 8) {
+    print ">" $1 ";" $4 ";" $5 "\n" $8
+}' "LRR_${NAME}_concat.tmp" > "LRR_${NAME}_interLRR.fasta"
 
-grep "interLRR" LRR_${NAME}_concat.tmp | gawk -F";" '($5-$4>8){print(">"$1";"$4";"$5"\n"$8)}' - > LRR_${NAME}_interLRR.fasta
+if [[ -s "LRR_${NAME}_interLRR.fasta" ]]; then
+  for profile in *.hmm
+  do
+      outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
+      hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
 
-for profile in *.hmm
-do
-    outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
-    hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
+      if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
+          rm ${outfile} #empty file
+      else
+          python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $WD/${outfile%.tbl}.csv
+      fi
 
-    if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
-        rm ${outfile} #enpty file
-    else
-        python3 $SCRIPT/Extract_interLRR_motifs.py -s LRR_${NAME}_interLRR.fasta -t ${outfile} -o $WD/${outfile%.tbl}.csv
-    fi
-    
-done
+  done
+fi
 
 ## d. Concatenate all motifs
-python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv 
+python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS_init.csv
 
 ##suppr csv to avoid redumdancies with next step
-rm *search.csv
+rm -f *search.csv
 
 ## B . SEARCH FOR LRR MOTIFS WITH BLAST
 ##---------------------------------------
@@ -151,7 +168,7 @@ rm *search.csv
 # if NBARC --> after LRR end domain position, if kinase --> before kinase strat position
 
 gawk -F";" 'BEGIN{OFS=";"}{
-     if(NR==FNR){
+     if(FILENAME == ARGV[1]){
           gsub(" ",";");
           CLASS[$1]=$2;
           if($2~/Kinase/){
@@ -159,12 +176,14 @@ gawk -F";" 'BEGIN{OFS=";"}{
           else{
                lim2[$1]=$4}}
      else{
-          if($2!~/interLRR/){
+          if(FNR > 1 && $2!~/interLRR/){
                if($1!=prot){
                     if(CLASS[$1]!~/NB-ARC/ || (CLASS[$1]~/NB-ARC/ && $4>lim2[$1])){prot=$1;S[$1]=$(4)-1;E[$1]=$(5)+1};}
                else{
                     if(CLASS[$1]!~/Kinase/ || (CLASS[$1]~/Kinase/ && $5<lim1[$1])){E[$1]=$(5)+1}}}}
-}END{for(i in S){
+}END{
+  PROCINFO["sorted_in"] = "@ind_str_asc"
+  for(i in S){
      if(lim1[i]!=""){
           print(i,1,S[i]);print(i,E[i],lim1[i]-1)}
      else{
@@ -173,42 +192,53 @@ gawk -F";" 'BEGIN{OFS=";"}{
           else{print(i,1,S[i]);print(i,E[i],"end")}}}
 }' ${NAME}_PriorClassif.txt LRR_${NAME}_ALLMOTIFS_init.csv > extraLRR_dom.tmp
 
-gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/>/){if(prot!=""){print(prot,seq);prot="";seq=""};gsub(">","");prot=$1}else{gsub("*","");seq=seq""$1}}END{print(prot,seq)}' $PROTEOME | gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{if($3=="end"){end=length(SEQ[$1]);string=substr(SEQ[$1],$2);}else{string=substr(SEQ[$1],$2,$3-$2+1);end=$3};if(end-$2>10){print(">"$1";"$2";"end"\n"string)}}}' - extraLRR_dom.tmp > extraLRR_regions.fasta
+gawk 'BEGIN{OFS=";";prot="";seq=""}{if($1~/^>/){if(prot!=""){sub(/\*$/, "", seq);print(prot,seq)};sub(/^>/, "", $1);prot=$1;seq=""}else{seq=seq""$1}}END{if(prot!=""){sub(/\*$/, "", seq);print(prot,seq)}}' "$PROTEOME" | gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){SEQ[$1]=$2}else{if($3=="end"){end=length(SEQ[$1]);string=substr(SEQ[$1],$2);}else{string=substr(SEQ[$1],$2,$3-$2+1);end=$3};if(end-$2>10){print(">"$1";"$2";"end"\n"string)}}}' - extraLRR_dom.tmp > extraLRR_regions.fasta
 
 # Create fasta for blast database
 cat LRR_${NAME}_interLRR.fasta extraLRR_regions.fasta > ${NAME}_noLRR_regions.fasta
-#gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/interLRR/ && $5-$4>=8){print(">"$1,$4,$5);print($8)}}else{if($3-$2>=8){print(">"$1,$2,$3);print($4)}}}' LRR_${NAME}_ALLMOTIFS_init.csv extraLRR_regions.txt > ${NAME}_noLRR_regions.fasta
 
-makeblastdb -in ${NAME}_noLRR_regions.fasta -dbtype prot -parse_seqids
-
-# Select LRR motifs with eval<5 for Query file
+# Select LRR motifs with eval<5 for query file
 gawk -F";" 'BEGIN{OFS=";"}NR>1{if($2!~/interLRR/ && $7<=5 && $6>=20 && $6<=26){print(">"$1,$4,$5);print($8)}}' LRR_${NAME}_ALLMOTIFS_init.csv > ${NAME}_LRR_seq.fasta
 
-time blastp -db ${NAME}_noLRR_regions.fasta -query ${NAME}_LRR_seq.fasta -max_hsps 2 -evalue 1.0 -out testblast.out -outfmt "6 qseqid sseqid length nident positive gaps bitscore evalue qstart qend sstart send qlen sseq"
+# Run BLAST only if both input FASTA files contain sequences.
+if [[ -s "${NAME}_noLRR_regions.fasta" && -s "${NAME}_LRR_seq.fasta" ]]; then
 
-#filtering results
-sort -k2,2 -Vk11,11 testblast.out | gawk 'BEGIN{OFS="\t"}{if($3>7 && $5/$3>0.6){print($0)}}' - > Resblast.tmp
+    makeblastdb -in ${NAME}_noLRR_regions.fasta -dbtype prot -parse_seqids
 
-#overlopping of more than 80%, we keep the hit with best eval
-gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
-      if($2==current && ((oldE-$11+1)/($12-$11))>0.8){
-           if($8<evalue){
-                line=$0;
-                oldS=$11;
-                oldE=$12;
-                evalue=$8;}}
-      else{
-           gsub("\t",";",line);
-           if(line!=""){print(line)};
-           current=$2;
-           oldS=$11;
-           oldE=$12;
-           evalue=$8;
-           line=$0;}
-}' Resblast.tmp > Resblast.txt
+    time blastp -db ${NAME}_noLRR_regions.fasta -query ${NAME}_LRR_seq.fasta -max_hsps 2 -evalue 1.0 -out testblast.out -outfmt "6 qseqid sseqid length nident positive gaps bitscore evalue qstart qend sstart send qlen sseq"
 
-#processed
-python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+    #filtering results
+    sort -k2,2 -Vk11,11 testblast.out | gawk 'BEGIN{OFS="\t"}{if($3>7 && $5/$3>0.6){print($0)}}' - > Resblast.tmp
+
+    #overlopping of more than 80%, we keep the hit with best eval
+    gawk -F"\t" 'BEGIN{OFS="\t";current="";line=""}{
+          if($2==current && ((oldE-$11+1)/($12-$11))>0.8){
+               if($8<evalue){
+                    line=$0;
+                    oldS=$11;
+                    oldE=$12;
+                    evalue=$8;}}
+          else{
+               gsub("\t",";",line);
+               if(line!=""){print(line)};
+               current=$2;
+               oldS=$11;
+               oldE=$12;
+               evalue=$8;
+               line=$0;}
+    }END{
+        if(line!=""){
+            gsub("\t",";",line);
+            print(line);
+        }
+    }' Resblast.tmp > Resblast.txt
+
+    #processed
+    python3 $SCRIPT/Extract_blast_motifs.py -s $PROTEOME -b Resblast.txt -o motifsblast.csv
+
+else
+    echo "No BLAST queries or searchable regions. Skipping BLAST."
+fi
 
 #concatenate
 python3 $SCRIPT/Concat_all_motifs.py -s $PROTEOME -d $WD -o $WD/LRR_${NAME}_ALLMOTIFS.csv
@@ -218,9 +248,6 @@ mkdir $OUT_DIR
 cp LRR_${NAME}_ALLMOTIFS.csv $OUT_DIR/.
 cp ${NAME}_PriorClassif.txt $OUT_DIR/.
 
-cd $MAIN 
+cd $MAIN
 
 echo "END STEP 2"
-
-
-

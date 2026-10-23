@@ -300,9 +300,9 @@ class Proteome:
             protSeq=sequences[prot].seq
 
             for mot in self.proteins[prot].motifs :
-                file.write("%s;%s;%i;%i;%i;%i;%f;%s\n" % (prot,mot.type,mot.index,mot.start,mot.end,mot.end-mot.start+1,mot.eval,protSeq[mot.start-1:mot.end]))
+                file.write("%s;%s;%i;%i;%i;%i;%s;%s\n" % (prot,mot.type,mot.index,mot.start,mot.end,mot.end-mot.start+1,mot.eval,protSeq[mot.start-1:mot.end]))
 
             for imot in self.proteins[prot].intermotifs :
-                file.write("%s;%s;%i;%i;%i;%i;%f;%s\n" % (prot,imot.type,imot.index,imot.start,imot.end,imot.end-imot.start+1,imot.eval,protSeq[imot.start-1:imot.end]))
+                file.write("%s;%s;%i;%i;%i;%i;%s;%s\n" % (prot,imot.type,imot.index,imot.start,imot.end,imot.end-imot.start+1,imot.eval,protSeq[imot.start-1:imot.end]))
 
         file.close()

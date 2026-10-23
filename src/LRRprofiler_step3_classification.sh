@@ -4,7 +4,7 @@
 # SCRIPT : LRRprofiler_step3_classification.sh
 # AUTHOR : Celine Gottin
 #========================================================
-# DESCRIPTION : 
+# DESCRIPTION :
 # ARGUMENTS : o $1 : Proteome (fasta)
 #             o $2 : Name
 # DEPENDENCIES : o HMMER v 3.1b2
@@ -15,7 +15,7 @@
 #========================================================
 #                Environment & variables
 #========================================================
-
+set -euo pipefail
 
 # variables
 function quit_pb_option() {
@@ -40,8 +40,8 @@ while (( $# > 0 )); do
     --in_proteome)
         PROTEOME=$(readlink -f "$2"); shift 2;
         if [[ ! -f $PROTEOME ]];then
-            echo "File $Proteome does not exist"
-            quit_pb_option	
+            echo "File $PROTEOME does not exist"
+            quit_pb_option
         fi
         ;;
     --name)
@@ -73,8 +73,28 @@ ln -s $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt .
 
 cat $LRRPROFILER_TMP/Liste* > ${NAME}_PriorClassif.txt
 
+# Check that motif results are available.
+if [[ ! -s "LRR_${NAME}_ALLMOTIFS.csv" ]]; then
+    echo "ERROR: Missing or empty LRR motif results." >&2
+    exit 1
+fi
+
 ## a. Extract LRR sequences in fasta format
 gawk '{if(NR==FNR){split($0,T,";");P[">"T[1]]=1}else{if($1~/>/){if(P[$1]==1){p=1}else{p=0}};if(p==1){print}}}' LRR_${NAME}_ALLMOTIFS.csv $PROTEOME > LRR_${NAME}.fasta
+
+# Skip domain annotation if no LRR proteins were identified.
+if [[ ! -s "LRR_${NAME}.fasta" ]]; then
+    if [[ $(wc -l < "LRR_${NAME}_ALLMOTIFS.csv") -gt 1 ]]; then
+        echo "ERROR: LRR motifs were found, but no protein sequences could be extracted." >&2
+        exit 1
+    fi
+
+    echo "No LRR proteins identified. Skipping domain annotation."
+    mkdir -p "$OUT_DIR"
+    : > "$OUT_DIR/LRR_classification.csv"
+    : > "$OUT_DIR/LRR_domains_filtered.csv"
+    exit 0
+fi
 
 # prot size
 gawk 'BEGIN{OFS=";"}{if($1~/>/){if(length(prot)>0){print(prot,L)};gsub(">","");prot=$1;L=0}else{L=L+length($0)}}END{if(length(prot)>0){print(prot,L)}}' LRR_${NAME}.fasta > LRR_prot_size.csv
@@ -94,7 +114,15 @@ do
 done
 
 ## tmhmm and keep peptide signal
-cat LRR_${NAME}.fasta | ${LG_TMHMM} -noplot > TMHMM_out.txt
+"${LG_TMHMM}" -noplot "LRR_${NAME}.fasta" > TMHMM_out.txt
+
+input_count=$(gawk '/^>/{n++} END{print n+0}' "LRR_${NAME}.fasta")
+output_count=$(gawk '/^# .* Length:/{n++} END{print n+0}' TMHMM_out.txt)
+
+if (( output_count != input_count )); then
+    echo "ERROR: TMHMM processed $output_count/$input_count proteins." >&2
+    exit 1
+fi
 
 gawk 'BEGIN{OFS=";"}{if($3~/TMhelix/){if($4>30){print($1,"TM",$4,$5)}else{print($1,"PS",$4,$5)}}}' TMHMM_out.txt >> LRR_domains.tmp
 
@@ -128,27 +156,44 @@ rm *.tmp
 ## e. Protein classification (NLR, RLK, RLP, F-box and other)
 
 ## Functionnal Domain list per proteins
-gawk -F";" 'BEGIN{OFS=";"}{if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}END{for(i in P){print(i,P[i])}}' LRR_domains_filtered.csv > tmp
-#gawk -F";" 'BEGIN{OFS=";"}{if($2!~/LRR/){if(P[$1]){P[$1]=P[$1]"-"$2}else{P[$1]=$2}}}END{for(i in P){print(i,P[i])}}' LRR_domains_filtered.csv > tmp
+gawk -F";" '
+    BEGIN {
+        OFS = ";"
+    }
+    {
+        if (P[$1]) {
+            P[$1] = P[$1] "-" $2
+        } else {
+            P[$1] = $2
+        }
+    }
+    END {
+        PROCINFO["sorted_in"] = "@ind_str_asc"
+        for (i in P) {
+            print i, P[i]
+        }
+    }
+' LRR_domains_filtered.csv > tmp
 
 ## Classif RLK; NLR and f-box
+: > putativeRLP.tmp
 gawk -F";" 'BEGIN{OFS=";"}{if($2~/NB-ARC/){print($1,"NLR")}else{if($2~/Fbox/ || $2~/F-box/ || $2~/FBD/){print($1,"F-box")}else{if($2~/Kinase/){print($1,"RLK")}else{if($2~/Malectin/ || $2~/TM/ || $2~/Cys-Pair/){print($1,"RLP")}else{print($1)>"putativeRLP.tmp"}}}}}' tmp > LRR_classification.tmp
 
-## For putative RLP : 
+## For putative RLP :
 #   - pct = % of PS type motifs
 #   - pct2 = % of NLR type motifs
 
 #  if pct1 > 65% and more than 13 motifs in protein => RLP
 #  if pct1> 10% and pct2 > 40% and pct1+pct2>90% => PIRL // not yet validated
 #gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS[$1]++}else{if($2~/LRR_NLR/){NLR[$1]++}}}}else{pct=PS[$1]/LRR[$1];if(pct>0.65 && PS[$1]>13){print($1,"RLP")}else{pct2=NLR[$1]/LRR[$1];if(pct2>0.4 && pct>0.1 && pct+pct2>0.9){print($1,"PIRL")}else{print($1,"other")}}}}' LRR_domains_filtered.csv putativeRLP.tmp >> LRR_classification.tmp
-gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS[$1]++}else{if($2~/LRR_NLR/){NLR[$1]++}}}}else{pct=PS[$1]/LRR[$1];if(pct>0.65 && PS[$1]>13){print($1,"RLP")}else{print($1,"other")}}}' LRR_domains_filtered.csv putativeRLP.tmp >> LRR_classification.tmp
+gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS[$1]++}else{if($2~/LRR_NLR/){NLR[$1]++}}}}else{pct=(LRR[$1] > 0 ? PS[$1]/LRR[$1] : 0);if(pct>0.65 && PS[$1]>13){print($1,"RLP")}else{print($1,"other")}}}' LRR_domains_filtered.csv putativeRLP.tmp >> LRR_classification.tmp
 
 
 ## Add number of identified LRR
 
 gawk -F"[; ]" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/ || $2~/BLAST/){P[$1]++}}else{print($1,$2,P[$1])}}' LRR_domains_filtered.csv LRR_classification.tmp > LRR_classification.csv
 
-## f. structure 
+## f. structure
 cp $SCRIPT/LRR_structure.Rmd .
 #cp $SCRIPT/render.R .
 #R CMD BATCH '--args $(pwd)' render.R
@@ -176,17 +221,14 @@ else
     cp LRR_domains_filtered.csv $OUT_DIR/.
 fi
 
-#if [[ ! -e LRR_structure.html ]];then
-#    echo "File LRR_structure.html was not created. This could be due to memory error."
-#else
-#    cp LRR_structure.html $OUT_DIR/.
-#fi
+html_report="LRR_structure_${NAME}.html"
 
-cd $MAIN 
+if [[ -s "$html_report" ]]; then
+    cp "$html_report" "$OUT_DIR/"
+else
+    echo "WARNING: HTML report was not generated." >&2
+fi
+
+cd $MAIN
 
 echo "END STEP 3"
-
-
-
-
-

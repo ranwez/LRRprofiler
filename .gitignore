@@ -1,1 +1,5 @@
+Res_*
+tests/
+__pycache__
 *.sif
+

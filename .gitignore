@@ -1,4 +1,5 @@
-container/*.sif
 Res_*
 tests/
 __pycache__
+*.sif
+

@@ -109,7 +109,7 @@ done
 for profile in *.hmm
 do
     outfile=${profile%.hmm}.tbl
-    hmmsearch -o del.tmp -E 1000 --domE 1000 -Z 500 --nobias --noali --domtblout ${outfile} $profile $PROTEOME
+    hmmsearch -o del.tmp -E 1000 --domE 1000 -Z 500 "${LRRPROFILER_HMMSEARCH_FILTER:---nobias}" --noali --domtblout ${outfile} $profile $PROTEOME
 
     if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
         rm ${outfile} #empty file
@@ -144,7 +144,7 @@ if [[ -s "LRR_${NAME}_interLRR.fasta" ]]; then
   for profile in *.hmm
   do
       outfile=LRR_${NAME}_${profile%.hmm}_interLRR_search.tbl
-      hmmsearch -o del.tmp -E 1000 --domE 1000 --noali --nobias --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
+      hmmsearch -o del.tmp -E 1000 --domE 1000 --noali "${LRRPROFILER_HMMSEARCH_FILTER:---nobias}" --domtblout ${outfile} $profile LRR_${NAME}_interLRR.fasta
 
       if [[ $(wc -l ${outfile} | gawk '{print $1}') -le 13 ]];then
           rm ${outfile} #empty file

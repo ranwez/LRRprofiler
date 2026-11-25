@@ -102,7 +102,7 @@ gawk 'BEGIN{OFS=";"}{if($1~/>/){if(length(prot)>0){print(prot,L)};gsub(">","");p
 ## b. Search for functionnal domains
 for hmm in F-box FBD NB-ARC Malectin Malectin_like TIR Cys-typeA Cys-typeB Cys-typeC Cys-typeD Cys-typeE
 do
-    hmmsearch -o del.tmp --nobias --noali --domtblout ${hmm}_$NAME.tbl ${LG_HMMlib}/${hmm}.hmm LRR_${NAME}.fasta
+    hmmsearch -o del.tmp "${LRRPROFILER_HMMSEARCH_FILTER:---nobias}" --noali --domtblout ${hmm}_$NAME.tbl ${LG_HMMlib}/${hmm}.hmm LRR_${NAME}.fasta
 done
 
 ## c. Extract Domains
@@ -193,41 +193,21 @@ gawk -F";" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/){LRR[$1]++;if($2~/LRR_PS/){PS
 
 gawk -F"[; ]" 'BEGIN{OFS=";"}{if(NR==FNR){if($2~/LRR/ || $2~/BLAST/){P[$1]++}}else{print($1,$2,P[$1])}}' LRR_domains_filtered.csv LRR_classification.tmp > LRR_classification.csv
 
-## f. structure
-cp $SCRIPT/LRR_structure.Rmd .
-#cp $SCRIPT/render.R .
-#R CMD BATCH '--args $(pwd)' render.R
 
-cat > render.R <<EOF
-library(rmarkdown)
-render("LRR_structure.Rmd", output_format = "html_document", output_file = "$(pwd)/LRR_structure_${NAME}.html", params = list(wd="${WD}"))
-EOF
+## f. Export classification and domain annotations
 
-R CMD BATCH render.R
+mkdir -p "$OUT_DIR"
 
+cp LRR_classification.csv LRR_domains_filtered.csv "$OUT_DIR/"
 
-# SAVE results
-mkdir -p $OUT_DIR
+## g. Generate HTML report
 
-if [[ ! -e LRR_classification.csv ]];then
-   echo "File LRR_classification does not exist. Process has failed"
-else
-    cp LRR_classification.csv $OUT_DIR/.
-fi
+python3 "$SCRIPT/generate_report.py" \
+    --domains LRR_domains_filtered.csv \
+    --sizes LRR_prot_size.csv \
+    --classification LRR_classification.csv \
+    --output "$OUT_DIR/LRR_structure_${NAME}.html"
 
-if [[ ! -e LRR_domains_filtered.csv ]];then
-   echo "File LRR_domains_filtered does not exist. Process has failed"
-else
-    cp LRR_domains_filtered.csv $OUT_DIR/.
-fi
-
-html_report="LRR_structure_${NAME}.html"
-
-if [[ -s "$html_report" ]]; then
-    cp "$html_report" "$OUT_DIR/"
-else
-    echo "WARNING: HTML report was not generated." >&2
-fi
 
 cd $MAIN
 

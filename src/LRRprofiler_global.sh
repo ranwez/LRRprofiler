@@ -32,7 +32,7 @@ set -o pipefail
 
 
 function quit_pb_option() {
-    printf "\nOptions : --in_proteome <fastafile> ; --name <string>; --dev ; --nobuild\n"
+    printf "\nOptions : --in_proteome <fastafile> ; --name <string> ; --dev ; --nobuild ; --max\n"
     exit 1
 }
 
@@ -49,7 +49,7 @@ PROTEOME=""
 NAME=""
 devopt=0
 nobuild=0
-
+export LRRPROFILER_HMMSEARCH_FILTER="--nobias"
 
 
 printf "\n\n============== PARSING OPTIONS\n"
@@ -78,6 +78,10 @@ while (( $# > 0 )); do
         nobuild=1; shift 1
         echo "    nobuild option set in"
         ;;
+    --max)
+        LRRPROFILER_HMMSEARCH_FILTER="--max"
+        shift 1
+        ;;
     *)
       echo "Option $1 is unknown please ckeck your command line"
       quit_pb_option
@@ -85,6 +89,7 @@ while (( $# > 0 )); do
     esac
 done
 
+echo "    HMMER search mode: $LRRPROFILER_HMMSEARCH_FILTER"
 
 # Variables
 MAIN=$(pwd)
@@ -129,7 +134,7 @@ echo -e "----------------------------\n"
 ## list Kinase and NB-ARC file
 gawk '{print($1,$3,$4)}' $LRRPROFILER_RESDIR/Res_step0_itak/${NAME}_shiu_alignment.txt | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"Kinase",start,end)};prot=$1;start=$2;end=$3}}END{if(prot!=""){print(prot,"Kinase",start,end)}}' > $LRRPROFILER_TMP/ListeKinase.txt
 
-hmmsearch -o /dev/null -Z 35000 --nobias --noali --domtblout $LRRPROFILER_TMP/NBARC.tbl ${LG_HMMlib}/NB-ARC.hmm $PROTEOME
+hmmsearch -o /dev/null -Z 35000 "${LRRPROFILER_HMMSEARCH_FILTER}" --noali --domtblout $LRRPROFILER_TMP/NBARC.tbl ${LG_HMMlib}/NB-ARC.hmm $PROTEOME
 gawk '$1!~/#/{print($1,$18,$19)}' $LRRPROFILER_TMP/NBARC.tbl | sort -k1,1 -Vk2,3 | gawk 'BEGIN{prot="";start=0;end=0}{if($1==prot && $2<end){end=$3}else{if(prot!=""){print(prot,"NB-ARC",start,end)};prot=$1;start=$2;end=$3}}END{if(prot!=""){print(prot,"NB-ARC",start,end)}}' > $LRRPROFILER_TMP/ListeNBARC.txt
 
 

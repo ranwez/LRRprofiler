@@ -135,7 +135,7 @@ do
 
 # a) execute hmmsearch the output file contain comment lines starting with # that should be ignored
 
-    hmmsearch -E 1000 --domE 1000 -o /dev/null --nobias --noali --domtblout HMMres${it}.tmp ${profile} $Proteins
+    hmmsearch -E 1000 --domE 1000 -o /dev/null "${LRRPROFILER_HMMSEARCH_FILTER:---nobias}" --noali --domtblout HMMres${it}.tmp ${profile} $Proteins
 
     nbProtOld=$nbProt
     nbProt=$(gawk '$1 !~ /^#/ {P[$1]=1} END{print length(P)}' "HMMres${it}.tmp")

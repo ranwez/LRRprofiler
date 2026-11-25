@@ -1,6 +1,6 @@
 version: 7
 platforms:
-- name: p1
+- name: linux-64-glibc-2-27-linux-4-15
   subdir: linux-64
   virtual-packages:
   - __glibc=2.27
@@ -13,7 +13,7 @@ environments:
     - url: https://conda.anaconda.org/conda-forge/
     - url: https://conda.anaconda.org/bioconda/
     packages:
-      p1:
+      linux-64-glibc-2-27-linux-4-15:
       - conda: https://conda.anaconda.org/bioconda/linux-64/blast-2.6.0-boost1.64_2.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/linux-64/hmmer-3.1b2-3.tar.bz2
       - conda: https://conda.anaconda.org/bioconda/linux-64/mafft-7.310-hdbdd923_7.tar.bz2

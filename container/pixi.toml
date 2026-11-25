@@ -3,7 +3,7 @@ authors = ["Johanna Girodolle"]
 name = "lrrprofiler"
 channels = ["conda-forge", "bioconda"]
 platforms = [{ platform = "linux-64", glibc = "2.27", linux = "4.15" }]
-version = "0.24.0"
+version = "0.25.0"
 
 [dependencies]
 python = "==3.6.5"
@@ -13,6 +13,5 @@ mafft = "==7.310"
 blast = "==2.6.0"
 
 # Historical system tools are pinned in the Apptainer definition:
-# Perl 5.26.1, BioPerl 1.7.2, GNU Awk 4.1.4, R 3.4.4,
-# Pandoc 1.19.2.4, rmarkdown 2.9, ggplot2 3.3.5, reshape2 1.4.4.
+# Perl 5.26.1, BioPerl 1.7.2, GNU Awk 4.1.4,
 # iTAK 2019-02-08 and LRRprofiler code are pinned by Git commit.

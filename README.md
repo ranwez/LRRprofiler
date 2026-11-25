@@ -19,10 +19,10 @@ The program uses several external tools and databases:
 
 LRRprofiler Singularity/Apptainer containers are available on the [GitHub Container Registry (GHCR)](https://github.com/JohGi?tab=packages). They can be downloaded directly using Apptainer or Singularity with the `oras://` protocol.
 
-**Latest version (0.24):**
+**Latest version (0.25):**
 
 ```bash
-apptainer pull LRRprofiler_0.24.sif oras://ghcr.io/johgi/lrrprofiler:0.24
+apptainer pull LRRprofiler_0.25.sif oras://ghcr.io/johgi/lrrprofiler:0.25
 ```
 
 ### Usage
@@ -30,16 +30,16 @@ apptainer pull LRRprofiler_0.24.sif oras://ghcr.io/johgi/lrrprofiler:0.24
 LRRprofiler can be run using Apptainer (or Singularity):
 
 ```bash
-apptainer run LRRprofiler_0.24.sif \
+apptainer run LRRprofiler_0.25.sif \
     --in_proteome <fastafile> \
     --name <jobname> \
-    [--dev] [--nobuild]
+    [--dev] [--nobuild] [--max]
 ```
 
 For example, using the provided Arabidopsis thaliana proteome:
 
 ```bash
-apptainer run LRRprofiler_0.24.sif \
+apptainer run LRRprofiler_0.25.sif \
     --in_proteome /opt/LRRprofiler/example/Arabidopsis_Thaliana_reviewed_proteom_SwissProt_05-2020.fasta \
     --name ARATH
 ```
@@ -52,3 +52,5 @@ apptainer run LRRprofiler_0.24.sif \
 --dev: (optional) If provided, the pipeline will retain the working directory containing temporary files.
 
 --nobuild: (optional) If provided, skip the profile refinement process and use exclusively profiles from the HMM_lib folder. This option can be useful to obtain homogeneous and reproductible annotation when comparing several proteomes.
+
+--max: (optional) Run all LRRprofiler HMMER searches in maximum sensitivity mode by disabling heuristic acceleration filters. This may improve the detection of divergent LRR motifs but may also increase the number of false positives and affect protein classification. Disabled by default.
